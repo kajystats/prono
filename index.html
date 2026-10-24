@@ -14,13 +14,17 @@
     <div class="bg-ball ball-1"></div>
     <div class="bg-ball ball-2"></div>
     <div class="bg-ball ball-3"></div>
-
     <header>
         <div class="container">
-            <div class="logo">
-                <h1>⚽ KAJY STATS</h1>
-                <p class="sous-titre">En direct · Pronostics · Résultats</p>
+            <!-- LOGO + TITRE CLIQUABLE VERS ACCUEIL -->
+            <div class="logo-titre" style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
+                <img src="logo.png" alt="KAJY STATS" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                <div>
+                    <h1 style="margin:0;font-size:1.5rem;font-weight:800;">KAJY STATS</h1>
+                    <p class="sous-titre" style="margin:0;color:#64748b;font-size:0.9rem;">En direct · Pronostics · Résultats</p>
+                </div>
             </div>
+            
             <nav>
                 <button id="nav-jour" class="nav-btn actif">📅 Matchs du jour</button>
                 <button id="nav-demain" class="nav-btn">🔮 Demain</button>
@@ -30,7 +34,6 @@
             </nav>
         </div>
     </header>
-
     <main class="container">
         <!-- Section : Matchs du jour -->
         <section id="section-jour" class="page active">
@@ -43,7 +46,6 @@
                     <span id="taux-reussite" class="stat-badge">🎯 Taux : <strong>—</strong></span>
                 </div>
             </div>
-
             <div class="filtres">
                 <label>Filtrer par ligue :
                     <select id="filtre-ligue">
@@ -64,17 +66,14 @@
                     </select>
                 </label>
             </div>
-
             <div id="tableau-matchs"></div>
         </section>
-
         <!-- Section : Demain -->
         <section id="section-demain" class="page">
             <button class="btn-retour" data-retour="jour">← Retour</button>
             <h2>🔮 Matchs de demain — <span id="date-demain">25 octobre 2026</span></h2>
             <div id="tableau-matchs-demain"></div>
         </section>
-
         <!-- Section : Coupons -->
         <section id="section-coupons" class="page">
             <button class="btn-retour" data-retour="jour">← Retour</button>
@@ -97,7 +96,6 @@
                 </div>
             </div>
         </section>
-
         <!-- Section : Historique -->
         <section id="section-historique" class="page">
             <button class="btn-retour" data-retour="jour">← Retour</button>
@@ -121,14 +119,12 @@
                     <p class="legende">de réussite</p>
                 </div>
             </div>
-
             <div class="nav-jours">
                 <button class="btn-jour actif" data-jour="2026-10-24">24 octobre 2026</button>
                 <button class="btn-jour" data-jour="2026-10-25">25 octobre 2026</button>
             </div>
             <div id="tableau-historique"></div>
         </section>
-
         <!-- Section : À propos -->
         <section id="section-a-propos" class="page">
             <button class="btn-retour" data-retour="jour">← Retour</button>
@@ -163,20 +159,17 @@
             </div>
         </section>
     </main>
-
     <!-- Bulle WhatsApp flottante -->
     <a href="https://wa.me/2250143253100" target="_blank" class="whatsapp-flottant" title="Nous contacter sur WhatsApp">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="28" height="28">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.151-.197.297-.76.966-.932 1.164-.172.199-.344.223-.641.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.477-1.761-1.653-2.059-.172-.297-.018-.458.134-.606.137-.136.297-.346.446-.519.151-.173.202-.296.302-.495.099-.198.05-.372-.025-.527-.075-.155-.67-1.611-.917-2.206-.24-.579-.486-.5-.66-.51-.168-.008-.359-.012-.55-.012-.191 0-.502.071-.766.372-.264.301-1.01 1.026-1.01 2.507 0 1.481 1.065 2.911 1.216 3.107.15.195 2.095 3.2 5.076 4.487.71.306 1.263.489 1.695.626.715.227 1.365.195 1.88.118.574-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.424 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c0-5.451 4.436-9.885 9.888-9.885 2.64 0 5.122 1.03 6.983 2.897a9.825 9.825 0 012.893 6.99c-.003 5.453-4.438 9.888-9.89 9.888m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.334.157 11.892c0 2.096.547 4.142 1.588 5.966L0 24l6.304-1.654a11.882 11.882 0 005.73.148l.005.002c6.554 0 11.89-5.334 11.892-11.893A11.821 11.821 0 0020.46 3.488z"/>
         </svg>
     </a>
-
     <footer>
         <div class="container">
             <p>© 2026 KAJY STATS — Résultats en direct & Pronostics | Jeu responsable</p>
         </div>
     </footer>
-
     <script src="js/app.js"></script>
 </body>
 </html>
