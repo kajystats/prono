@@ -3,7 +3,6 @@ const API_DEMAIN = 'data/2026-10-25.json';
 
 let donneesJour = [], donneesDemain = [];
 
-// Navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('actif'));
@@ -13,7 +12,6 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     });
 });
 
-// Charger données
 async function charger() {
     try {
         const r1 = await fetch(API_JOUR);
@@ -41,7 +39,7 @@ function afficherTableau(idConteneur, matches) {
                 <td><strong>${m.equipe1}</strong> – ${m.equipe2}</td>
                 <td>${m.heure}</td>
                 <td>${m.pronostic}</td>
-                <td><span class="badge conf-${m.confiance}">${m.confiance}</span></td>
+                <td><span class="badge conf-${m.niveau}">${m.confiance}</span></td>
             </tr>`).join('')}
         </table>`;
 }
