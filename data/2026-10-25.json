@@ -1,6 +1,7 @@
 [
-  {"ligue":"La Liga","equipe1":"FC Barcelone","equipe2":"Real Madrid","heure":"20:00","pronostic":"2-1","niveau":"elevee","confiance":"élevée"},
-  {"ligue":"Premier League","equipe1":"Liverpool","equipe2":"West Ham","heure":"14:00","pronostic":"3-1","niveau":"elevee","confiance":"élevée"},
-  {"ligue":"Bundesliga","equipe1":"Fribourg","equipe2":"Bayern Munich","heure":"16:30","pronostic":"1-2","niveau":"moyenne","confiance":"moyenne"},
-  {"ligue":"Ligue 1","equipe1":"Marseille","equipe2":"Le Havre","heure":"16:00","pronostic":"2-0","niveau":"elevee","confiance":"élevée"}
+  {"ligue":"Premier League","equipe1":"Liverpool","equipe2":"Nottingham","heure":"13:00","pronostic":"3-0","niveau":"elevee","confiance":"élevée","statut":"avenir"},
+  {"ligue":"Premier League","equipe1":"Man Utd","equipe2":"Leicester","heure":"15:30","pronostic":"2-1","niveau":"moyenne","confiance":"moyenne","statut":"avenir"},
+  {"ligue":"La Liga","equipe1":"Barcelone","equipe2":"Séville","heure":"17:00","pronostic":"3-1","niveau":"elevee","confiance":"élevée","statut":"avenir"},
+  {"ligue":"Serie A","equipe1":"Inter Milan","equipe2":"Juventus","heure":"20:45","pronostic":"1-1","niveau":"moyenne","confiance":"moyenne","statut":"avenir"},
+  {"ligue":"Ligue 1","equipe1":"PSG","equipe2":"Marseille","heure":"21:00","pronostic":"2-0","niveau":"elevee","confiance":"élevée","statut":"avenir"}
 ]
