@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAJY STATS - Statistiques & Pronostics Football</title>
+    <link rel="icon" type="image/png" href="images/logo-emblem.png">
+    <meta name="description" content="Analyses détaillées, statistiques et pronostics sur les 5 grands championnats européens — données sourcées et datées.">
+    <meta property="og:title" content="KAJY STATS">
+    <meta property="og:description" content="Analyses foot · Coupons · Fiches match">
+    <meta property="og:image" content="images/logo-emblem.png">
+    <meta property="og:url" content="https://kajystats.github.io/">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="images/logo-wordmark.png" alt="KAJY STATS" onerror="this.style.display='none'">
+                <h1>KAJY STATS</h1>
+            </div>
+            <nav>
+                <button id="nav-jour" class="nav-btn actif">📅 Jour du jour</button>
+                <button id="nav-demain" class="nav-btn">🔮 Demain</button>
+                <button id="nav-coupons" class="nav-btn">🎟️ Coupons</button>
+                <button id="nav-a-propos" class="nav-btn">ℹ️ À propos</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="section-jour" class="page active">
+            <h2>📅 Matchs du jour — <span id="date-jour">24 octobre 2026</span></h2>
+            <div class="filtres">
+                <label>Filtrer par ligue :
+                    <select id="filtre-ligue">
+                        <option value="tout">Toutes les ligues</option>
+                        <option value="Premier League">Premier League</option>
+                        <option value="La Liga">La Liga</option>
+                        <option value="Serie A">Serie A</option>
+                        <option value="Bundesliga">Bundesliga</option>
+                        <option value="Ligue 1">Ligue 1</option>
+                    </select>
+                </label>
+            </div>
+            <div id="tableau-matchs"></div>
+        </section>
+
+        <section id="section-demain" class="page">
+            <h2>🔮 Matchs de demain — <span id="date-demain">25 octobre 2026</span></h2>
+            <div id="tableau-matchs-demain"></div>
+        </section>
+
+        <section id="section-coupons" class="page">
+            <h2>🎟️ Coupons du jour</h2>
+            <p class="intro-coupons">Deux combinaisons distinctes — aucun match en commun.</p>
+            <div class="coupons-grid">
+                <div class="coupon coupon-a">
+                    <h3>🟢 Coupon A — Confiance élevée</h3>
+                    <ul id="liste-coupon-a"></ul>
+                </div>
+                <div class="coupon coupon-b">
+                    <h3>🟡 Coupon B — Profil équilibré</h3>
+                    <ul id="liste-coupon-b"></ul>
+                </div>
+            </div>
+            <div class="bouton-telecharger">
+                <button id="btn-png">📸 Télécharger la carte du jour (PNG pour Instagram)</button>
+            </div>
+        </section>
+
+        <section id="section-a-propos" class="page">
+            <h2>ℹ️ À propos & Méthode</h2>
+            <div class="contenu-a-propos">
+                <h3>Notre démarche</h3>
+                <p>Toutes les informations sont collectées auprès de sources fiables et datées. En cas d'incertitude, cela est explicitement signalé — rien n'est inventé.</p>
+                <h3>Niveaux de confiance</h3>
+                <ul class="legende">
+                    <li><span class="badge conf-elevee">Élevée</span> : données complètes, sources concordantes, historique solide</li>
+                    <li><span class="badge conf-moyenne">Moyenne</span> : bon niveau d'information, quelques inconnues</li>
+                    <li><span class="badge conf-faible">Faible</span> : informations partielles ou contradictoires</li>
+                </ul>
+                <h3>Jeu responsable</h3>
+                <p>⚠️ Ces analyses sont fournies à but informatif et éducatif. Ce ne sont pas des certitudes — le football reste imprévisible. Jouez modérément et dans la limite de vos moyens.</p>
+                <h3>Laisser un avis / un commentaire</h3>
+                <form id="form-avis">
+                    <input type="text" id="avis-nom" placeholder="Votre pseudo" required>
+                    <textarea id="avis-message" placeholder="Votre commentaire / avis..." required></textarea>
+                    <div class="note">
+                        <label>Note : </label>
+                        <span>⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <button type="submit">Envoyer</button>
+                </form>
+                <div id="liste-avis"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 KAJY STATS — Toutes données sourcées et datées | <a href="#" id="lien-mentions">Jeu responsable & Mentions</a></p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

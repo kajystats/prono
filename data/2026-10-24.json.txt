@@ -1,0 +1,21 @@
+[
+  {"ligue":"Premier League","equipe1":"Aston Villa","equipe2":"Man City","heure":"11:30","pronostic":"1-2","niveau":"moyenne","confiance":"moyenne"},
+  {"ligue":"Premier League","equipe1":"Arsenal","equipe2":"Everton","heure":"14:00","pronostic":"2-0","niveau":"elevee","confiance":"élevée"},
+  {"ligue":"Premier League","equipe1":"Coventry","equipe2":"Fulham","heure":"14:00","pronostic":"1-1","niveau":"faible","confiance":"faible"},
+  {"ligue":"Premier League","equipe1":"Chelsea","equipe2":"Tottenham","heure":"16:30","pronostic":"2-1","niveau":"moyenne","confiance":"moyenne"},
+  {"ligue":"La Liga","equipe1":"Rayo Vallecano","equipe2":"Elche","heure":"12:00","pronostic":"1-1","niveau":"moyenne","confiance":"moyenne"},
+  {"ligue":"La Liga","equipe1":"Racing Santander","equipe2":"Espanyol","heure":"14:15","pronostic":"2-1 Racing","niveau":"moyenne","confiance":"moyenne"},
+  {"ligue":"La Liga","equipe1":"Valencia","equipe2":"Villarreal","heure":"16:30","pronostic":"1-1","niveau":"moyenne","confiance":"moyenne"},
+  {"ligue":"La Liga","equipe1":"Atlético Madrid","equipe2":"Deportivo La Corogne","heure":"19:00","pronostic":"2-0","niveau":"elevee","confiance":"élevée"},
+  {"ligue":"Serie A","equipe1":"Cagliari","equipe2":"Bologna","heure":"13:00","pronostic":"1-1","niveau":"moyenne","confiance":"moyenne"},
+  {"ligue":"Serie A","equipe1":"Como","equipe2":"Sassuolo","heure":"13:00","pronostic":"2-1 Como","niveau":"moyenne","confiance":"moyenne"},
+  {"ligue":"Serie A","equipe1":"Napoli","equipe2":"Roma","heure":"16:00","pronostic":"1-1","niveau":"moyenne","confiance":"moyenne"},
+  {"ligue":"Serie A","equipe1":"Lazio","equipe2":"Parma","heure":"18:45","pronostic":"2-0","niveau":"elevee","confiance":"élevée"},
+  {"ligue":"Bundesliga","equipe1":"Köln","equipe2":"Schalke 04","heure":"13:30","pronostic":"2-0","niveau":"moyenne","confiance":"moyenne"},
+  {"ligue":"Bundesliga","equipe1":"Augsburg","equipe2":"Union Berlin","heure":"13:30","pronostic":"2-1","niveau":"moyenne","confiance":"moyenne"},
+  {"ligue":"Bundesliga","equipe1":"Mainz 05","equipe2":"Werder Brême","heure":"13:30","pronostic":"2-2","niveau":"faible","confiance":"faible"},
+  {"ligue":"Bundesliga","equipe1":"RB Leipzig","equipe2":"Elversberg","heure":"13:30","pronostic":"3-1","niveau":"elevee","confiance":"élevée"},
+  {"ligue":"Bundesliga","equipe1":"Paderborn","equipe2":"HSV","heure":"13:30","pronostic":"1-1","niveau":"faible","confiance":"faible"},
+  {"ligue":"Bundesliga","equipe1":"Dortmund","equipe2":"Eintracht Francfort","heure":"16:30","pronostic":"2-0","niveau":"elevee","confiance":"élevée"},
+  {"ligue":"Ligue 1","equipe1":"Lens","equipe2":"Paris FC","heure":"18:45","pronostic":"1-1 / 2-1 Lens","niveau":"moyenne","confiance":"moyenne"}
+]

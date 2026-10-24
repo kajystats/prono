@@ -1,0 +1,6 @@
+[
+  {"ligue":"La Liga","equipe1":"FC Barcelone","equipe2":"Real Madrid","heure":"20:00","pronostic":"2-1","niveau":"elevee","confiance":"élevée"},
+  {"ligue":"Premier League","equipe1":"Liverpool","equipe2":"West Ham","heure":"14:00","pronostic":"3-1","niveau":"elevee","confiance":"élevée"},
+  {"ligue":"Bundesliga","equipe1":"Fribourg","equipe2":"Bayern Munich","heure":"16:30","pronostic":"1-2","niveau":"moyenne","confiance":"moyenne"},
+  {"ligue":"Ligue 1","equipe1":"Marseille","equipe2":"Le Havre","heure":"16:00","pronostic":"2-0","niveau":"elevee","confiance":"élevée"}
+]
