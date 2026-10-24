@@ -8,10 +8,12 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Fond décoratif -->
+    <!-- Fonds décoratifs -->
+    <div class="bg-stade"></div>
     <div class="bg-overlay"></div>
     <div class="bg-ball ball-1"></div>
     <div class="bg-ball ball-2"></div>
+    <div class="bg-ball ball-3"></div>
 
     <header>
         <div class="container">
@@ -32,6 +34,7 @@
     <main class="container">
         <!-- Section : Matchs du jour -->
         <section id="section-jour" class="page active">
+            <button class="btn-retour" style="display:none;">← Retour</button>
             <h2>📅 Matchs du jour — <span id="date-jour">24 octobre 2026</span></h2>
             <div class="filtres">
                 <label>Filtrer par ligue :
@@ -50,12 +53,14 @@
 
         <!-- Section : Demain -->
         <section id="section-demain" class="page">
+            <button class="btn-retour" data-retour="jour">← Retour</button>
             <h2>🔮 Matchs de demain — <span id="date-demain">25 octobre 2026</span></h2>
             <div id="tableau-matchs-demain"></div>
         </section>
 
         <!-- Section : Coupons -->
         <section id="section-coupons" class="page">
+            <button class="btn-retour" data-retour="jour">← Retour</button>
             <h2>🎟️ Coupons du jour</h2>
             <p class="intro-coupons">Deux combinaisons distinctes — aucun match en commun.</p>
             <div class="coupons-grid">
@@ -72,6 +77,7 @@
 
         <!-- Section : Historique / Tous les pronostics -->
         <section id="section-historique" class="page">
+            <button class="btn-retour" data-retour="jour">← Retour</button>
             <h2>📊 Tous les Pronostics</h2>
             <p class="intro-coupons">Consultez les analyses des jours précédents et à venir.</p>
             <div class="nav-jours">
@@ -83,6 +89,7 @@
 
         <!-- Section : À propos -->
         <section id="section-a-propos" class="page">
+            <button class="btn-retour" data-retour="jour">← Retour</button>
             <h2>ℹ️ À propos & Méthode</h2>
             <div class="contenu-a-propos">
                 <h3>Notre démarche</h3>
@@ -95,21 +102,20 @@
                 </ul>
                 <h3>Jeu responsable</h3>
                 <p>⚠️ Ces analyses sont fournies à but informatif et éducatif. Ce ne sont pas des certitudes — le football reste imprévisible. Jouez modérément et dans la limite de vos moyens.</p>
-                <h3>Nous contacter</h3>
-                <p>Pour toute demande, conseil ou partenariat :</p>
-                <a href="https://wa.me/2250747526793" target="_blank" class="btn-whatsapp">💬 WhatsApp : +225 07 47 52 67 93</a>
             </div>
         </section>
     </main>
 
-    <!-- Lien WhatsApp flottant -->
+    <!-- Bulle flottante WhatsApp — logo seul, pas de numéro affiché -->
     <a href="https://wa.me/2250747526793" target="_blank" class="whatsapp-flottant" title="Nous contacter sur WhatsApp">
-        💬
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="28" height="28">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.151-.197.297-.76.966-.932 1.164-.172.199-.344.223-.641.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.477-1.761-1.653-2.059-.172-.297-.018-.458.134-.606.137-.136.297-.346.446-.519.151-.173.202-.296.302-.495.099-.198.05-.372-.025-.527-.075-.155-.67-1.611-.917-2.206-.24-.579-.486-.5-.66-.51-.168-.008-.359-.012-.55-.012-.191 0-.502.071-.766.372-.264.301-1.01 1.026-1.01 2.507 0 1.481 1.065 2.911 1.216 3.107.15.195 2.095 3.2 5.076 4.487.71.306 1.263.489 1.695.626.715.227 1.365.195 1.88.118.574-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.424 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c0-5.451 4.436-9.885 9.888-9.885 2.64 0 5.122 1.03 6.983 2.897a9.825 9.825 0 012.893 6.99c-.003 5.453-4.438 9.888-9.89 9.888m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.334.157 11.892c0 2.096.547 4.142 1.588 5.966L0 24l6.304-1.654a11.882 11.882 0 005.73.148l.005.002c6.554 0 11.89-5.334 11.892-11.893A11.821 11.821 0 0020.46 3.488z"/>
+        </svg>
     </a>
 
     <footer>
         <div class="container">
-            <p>© 2026 KAJY STATS — Toutes données sourcées et datées | <a href="https://wa.me/2250747526793" target="_blank">WhatsApp : +225 07 47 52 67 93</a> | Jeu responsable</p>
+            <p>© 2026 KAJY STATS — Toutes données sourcées et datées | Jeu responsable</p>
         </div>
     </footer>
 
