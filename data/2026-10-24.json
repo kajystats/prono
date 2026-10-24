@@ -16,4 +16,5 @@
   {"ligue":"Bundesliga","equipe1":"Mainz 05","equipe2":"Werder Brême","heure":"13:30","pronostic":"2-2","niveau":"faible","confiance":"faible","statut":"termine","scoreFinal":"3-1"},
   {"ligue":"Bundesliga","equipe1":"RB Leipzig","equipe2":"Elversberg","heure":"13:30","pronostic":"3-1","niveau":"elevee","confiance":"élevée","statut":"termine","scoreFinal":"3-1"},
   {"ligue":"Bundesliga","equipe1":"Paderborn","equipe2":"HSV","heure":"13:30","pronostic":"1-1","niveau":"faible","confiance":"faible","statut":"termine","scoreFinal":"2-1"},
-  {"ligue":"Bundesliga","equipe1":"Dortmund","equipe2":"Eintracht Francfort","heure":"16:30","pronostic":"2-0","niveau":"elevee","confiance":"é
+  {"ligue":"Bundesliga","equipe1":"Dortmund","equipe2":"Eintracht Francfort","heure":"16:30","pronostic":"2-0","niveau":"elevee","confiance":"élevée","statut":"avenir"}
+]
