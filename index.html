@@ -3,27 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KAJY STATS - Statistiques & Pronostics Football</title>
+    <title>KAJY STATS — Statistiques & Pronostics Football</title>
+    <meta name="description" content="Analyses détaillées, statistiques et pronostics sur les 5 grands championnats européens — données sourcées et datées.">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- Fond décoratif -->
+    <div class="bg-overlay"></div>
+    <div class="bg-ball ball-1"></div>
+    <div class="bg-ball ball-2"></div>
+
     <header>
         <div class="container">
             <div class="logo">
-                <h1>KAJY STATS</h1>
+                <h1>⚽ KAJY STATS</h1>
+                <p class="sous-titre">Analyses · Statistiques · Pronostics</p>
             </div>
             <nav>
-                <button id="nav-jour" class="nav-btn actif">📅 Jour du jour</button>
+                <button id="nav-jour" class="nav-btn actif">📅 Matchs du jour</button>
                 <button id="nav-demain" class="nav-btn">🔮 Demain</button>
                 <button id="nav-coupons" class="nav-btn">🎟️ Coupons</button>
+                <button id="nav-historique" class="nav-btn">📊 Tous les Pronostics</button>
                 <button id="nav-a-propos" class="nav-btn">ℹ️ À propos</button>
             </nav>
         </div>
     </header>
 
     <main class="container">
+        <!-- Section : Matchs du jour -->
         <section id="section-jour" class="page active">
-            <h2>📅 Matchs du jour — 24 octobre 2026</h2>
+            <h2>📅 Matchs du jour — <span id="date-jour">24 octobre 2026</span></h2>
             <div class="filtres">
                 <label>Filtrer par ligue :
                     <select id="filtre-ligue">
@@ -39,11 +48,13 @@
             <div id="tableau-matchs"></div>
         </section>
 
+        <!-- Section : Demain -->
         <section id="section-demain" class="page">
-            <h2>🔮 Matchs de demain — 25 octobre 2026</h2>
+            <h2>🔮 Matchs de demain — <span id="date-demain">25 octobre 2026</span></h2>
             <div id="tableau-matchs-demain"></div>
         </section>
 
+        <!-- Section : Coupons -->
         <section id="section-coupons" class="page">
             <h2>🎟️ Coupons du jour</h2>
             <p class="intro-coupons">Deux combinaisons distinctes — aucun match en commun.</p>
@@ -59,26 +70,46 @@
             </div>
         </section>
 
+        <!-- Section : Historique / Tous les pronostics -->
+        <section id="section-historique" class="page">
+            <h2>📊 Tous les Pronostics</h2>
+            <p class="intro-coupons">Consultez les analyses des jours précédents et à venir.</p>
+            <div class="nav-jours">
+                <button class="btn-jour actif" data-jour="2026-10-24">24 octobre 2026</button>
+                <button class="btn-jour" data-jour="2026-10-25">25 octobre 2026</button>
+            </div>
+            <div id="tableau-historique"></div>
+        </section>
+
+        <!-- Section : À propos -->
         <section id="section-a-propos" class="page">
             <h2>ℹ️ À propos & Méthode</h2>
-            <div>
+            <div class="contenu-a-propos">
                 <h3>Notre démarche</h3>
                 <p>Toutes les informations sont collectées auprès de sources fiables et datées. En cas d'incertitude, cela est explicitement signalé — rien n'est inventé.</p>
                 <h3>Niveaux de confiance</h3>
-                <ul style="margin:1rem 0 1rem 2rem;">
+                <ul class="legende">
                     <li><span class="badge conf-elevee">Élevée</span> : données complètes, sources concordantes, historique solide</li>
                     <li><span class="badge conf-moyenne">Moyenne</span> : bon niveau d'information, quelques inconnues</li>
                     <li><span class="badge conf-faible">Faible</span> : informations partielles ou contradictoires</li>
                 </ul>
                 <h3>Jeu responsable</h3>
                 <p>⚠️ Ces analyses sont fournies à but informatif et éducatif. Ce ne sont pas des certitudes — le football reste imprévisible. Jouez modérément et dans la limite de vos moyens.</p>
+                <h3>Nous contacter</h3>
+                <p>Pour toute demande, conseil ou partenariat :</p>
+                <a href="https://wa.me/2250747526793" target="_blank" class="btn-whatsapp">💬 WhatsApp : +225 07 47 52 67 93</a>
             </div>
         </section>
     </main>
 
+    <!-- Lien WhatsApp flottant -->
+    <a href="https://wa.me/2250747526793" target="_blank" class="whatsapp-flottant" title="Nous contacter sur WhatsApp">
+        💬
+    </a>
+
     <footer>
         <div class="container">
-            <p>© 2026 KAJY STATS — Toutes données sourcées et datées | Jeu responsable</p>
+            <p>© 2026 KAJY STATS — Toutes données sourcées et datées | <a href="https://wa.me/2250747526793" target="_blank">WhatsApp : +225 07 47 52 67 93</a> | Jeu responsable</p>
         </div>
     </footer>
 
