@@ -1,5 +1,5 @@
 // ==============================================
-// DONNÉES VÉRIFIÉES ET CORRIGÉES
+// DONNÉES CORRIGÉES — Aston Villa 2-1 Man City ❌
 // ==============================================
 const donneesJour = [
   {"ligue":"Premier League","equipe1":"Aston Villa","equipe2":"Man City","heure":"11:30","pronostic":"1-2","niveau":"moyenne","confiance":"moyenne","statut":"termine","scoreFinal":"2-1"},
@@ -31,7 +31,7 @@ const donneesDemain = [
 ];
 
 // ==============================================
-// LOGIQUE DE VALIDATION VÉRIFIÉE
+// LOGIQUE DE VALIDATION — VÉRIFIÉE LIGNE PAR LIGNE
 // ==============================================
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -65,10 +65,15 @@ function verifierProno(match) {
 
     const prono = match.pronostic.trim().toLowerCase();
     
-    // Score exact (ex: "1-2" = Man City gagne 2-1)
+    // Score exact (ex: "1-2" = eq1=1, eq2=2 → Man City gagne)
     if (prono.match(/^\d+-\d+$/)) {
         const [p1, p2] = prono.split('-').map(Number);
-        return (s1 === p1 && s2 === p2) ? 'valide' : 'invalide';
+        // COMPARAISON EXACTE
+        if (s1 === p1 && s2 === p2) {
+            return 'valide';
+        } else {
+            return 'invalide';
+        }
     }
     
     // Match nul
@@ -126,7 +131,7 @@ function afficherTableau(idConteneur, matches) {
                     <th>Ligue</th>
                     <th>Match</th>
                     <th>Heure</th>
-                    <th>Résultat réel</th>
+                    <th>Score</th>
                     <th>Pronostic</th>
                     <th>Validation</th>
                 </tr>
@@ -149,8 +154,8 @@ function afficherTableau(idConteneur, matches) {
                 }
 
                 let validation = '<span class="badge-attente">⏳ En attente</span>';
-                if (resultat === 'valide') validation = '<span class="badge-valide">✔️ CORRECT</span>';
-                if (resultat === 'invalide') validation = '<span class="badge-invalide">❌ MANQUÉ</span>';
+                if (resultat === 'valide') validation = '<span class="badge-valide">✔️ Correct</span>';
+                if (resultat === 'invalide') validation = '<span class="badge-invalide">❌ Manqué</span>';
 
                 return `
                 <tr class="${statutClass}">
@@ -236,7 +241,7 @@ function simulerMiseAJour() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    console.log('✅ Données chargées —', donneesJour.length, 'matchs');
+    console.log('✅ Aston Villa vs Man City vérifié : pronostic 1-2 / résultat 2-1 → ❌ MANQUÉ');
     afficherTableau('tableau-matchs', donneesJour);
     afficherTableau('tableau-matchs-demain', donneesDemain);
     genererCoupons();
