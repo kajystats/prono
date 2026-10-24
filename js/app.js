@@ -2,15 +2,15 @@ const API_JOUR = 'data/2026-10-24.json';
 const API_DEMAIN = 'data/2026-10-25.json';
 
 let donneesJour = [], donneesDemain = [];
-let miseAJourEnCours = false;
 
-// --- Navigation principale ---
+// --- Navigation ---
 document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('actif'));
         btn.classList.add('actif');
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('section-' + btn.id.replace('nav-','')).classList.add('active');
+        const pageId = 'section-' + btn.id.replace('nav-', '');
+        document.getElementById(pageId).classList.add('active');
     });
 });
 
@@ -33,53 +33,42 @@ document.addEventListener('click', e => {
     }
 });
 
-// Filtres statut
-document.getElementById('filtre-statut').addEventListener('change', e => {
-    afficherTableau('tableau-matchs', donneesJour);
-});
+// Filtres
+document.getElementById('filtre-ligue')?.addEventListener('change', () => afficherTableau('tableau-matchs', donneesJour));
+document.getElementById('filtre-statut')?.addEventListener('change', () => afficherTableau('tableau-matchs', donneesJour));
 
 // --- Chargement des données ---
 async function charger() {
     try {
+        console.log('Chargement des données du jour...');
         const r1 = await fetch(API_JOUR);
+        if (!r1.ok) throw new Error(`Erreur fichier jour: ${r1.status}`);
         donneesJour = await r1.json();
+        console.log('Matchs chargés:', donneesJour.length);
         afficherTableau('tableau-matchs', donneesJour);
         genererCoupons();
         mettreAJourResume();
-    } catch(e) {console.error('Erreur jour :', e);}
+    } catch(e) {
+        console.error('Problème chargement jour:', e);
+        document.getElementById('tableau-matchs').innerHTML = `
+            <div style="padding:2rem;text-align:center;color:#ef4444;background:#fef2f2;border-radius:12px;">
+                ⚠️ Impossible de charger les données<br>
+                <small>Vérifie que le dossier <code>data/</code> et le fichier <code>2026-10-24.json</code> existent</small>
+            </div>`;
+    }
+
     try {
         const r2 = await fetch(API_DEMAIN);
+        if (!r2.ok) throw new Error(`Erreur fichier demain: ${r2.status}`);
         donneesDemain = await r2.json();
         afficherTableau('tableau-matchs-demain', donneesDemain);
-    } catch(e) {console.error('Erreur demain :', e);}
-    chargerHistorique('2026-10-24');
-}
-
-// Simulation de mise à jour en direct
-function simulerMiseAJourDirect() {
-    donneesJour.forEach(match => {
-        if (match.statut === 'direct' && match.scoreFinal === undefined) {
-            if (!match.score) match.score = {eq1:0, eq2:0};
-            // Mise à jour aléatoire du score pour démonstration
-            if (Math.random() < 0.08) {
-                Math.random() < 0.5 ? match.score.eq1++ : match.score.eq2++;
-            }
-            // Fin aléatoire du match
-            if (Math.random() < 0.015) {
-                match.statut = 'termine';
-                match.scoreFinal = `${match.score.eq1} - ${match.score.eq2}`;
-                match.valide = verifierProno(match);
-            }
-        }
-    });
-    afficherTableau('tableau-matchs', donneesJour);
-    genererCoupons();
-    mettreAJourResume();
+    } catch(e) {
+        console.error('Problème chargement demain:', e);
+    }
 }
 
 function chargerHistorique(date) {
-    const fichier = `data/${date}.json`;
-    fetch(fichier)
+    fetch(`data/${date}.json`)
         .then(r => {
             if (!r.ok) throw new Error('Fichier introuvable');
             return r.json();
@@ -93,60 +82,46 @@ function chargerHistorique(date) {
             afficherTableau('tableau-historique', data);
         })
         .catch(() => {
-            document.getElementById('tableau-historique').innerHTML =
-                `<p style="text-align:center;padding:2rem;color:var(--or);">
-                 ⚠️ Données indisponibles pour cette date</p>`;
+            document.getElementById('tableau-historique').innerHTML = `
+                <p style="text-align:center;padding:2rem;color:#f59e0b;">
+                    ⚠️ Données indisponibles pour cette date
+                </p>`;
         });
 }
 
-// --- Logique de validation du pronostic ---
+// --- Validation du pronostic ---
 function verifierProno(match) {
     if (!match.scoreFinal || match.statut !== 'termine') return 'attente';
     const [s1, s2] = match.scoreFinal.split('-').map(Number);
     const prono = match.pronostic.trim().toLowerCase();
     
-    // Exemples : "2-0", "1-2", "Nul", "2-1 Racing"
-    if (prono.includes('nul') || prono.includes('1-1')) {
+    if (prono.includes('nul') || prono === '1-1') {
         return s1 === s2 ? 'valide' : 'invalide';
     }
-    if (prono.includes('–') || prono.includes('-')) {
-        const parties = prono.split(/[–-]/).map(p => p.trim());
-        if (parties.length >= 2 && !isNaN(parties[0]) && !isNaN(parties[1])) {
-            const [p1, p2] = [parseInt(parties[0]), parseInt(parties[1])];
-            return (s1 === p1 && s2 === p2) ? 'valide' : 'invalide';
-        }
+    if (prono.match(/^\d+-\d+$/)) {
+        const [p1, p2] = prono.split('-').map(Number);
+        return (s1 === p1 && s2 === p2) ? 'valide' : 'invalide';
     }
-    // Gagnant
-    if (prono.includes('1-') || prono.includes('2-') || prono.includes(' -')) {
-        const gProno = prono.startsWith('1') ? 'domicile' : prono.startsWith('2') ? 'exterieur' : 'nul';
-        const gReel = s1 > s2 ? 'domicile' : s2 > s1 ? 'exterieur' : 'nul';
-        return gProno === gReel ? 'valide' : 'invalide';
-    }
+    if (prono.startsWith('1-')) return s1 > s2 ? 'valide' : 'invalide';
+    if (prono.startsWith('2-')) return s2 > s1 ? 'valide' : 'invalide';
     return 'invalide';
 }
 
-// --- Affichage des tableaux ---
+// --- Affichage tableau ---
 function afficherTableau(idConteneur, matches) {
     const conteneur = document.getElementById(idConteneur);
-    if (!matches || matches.length === 0) {
-        conteneur.innerHTML = `<p style="text-align:center;padding:2rem;color:var(--texte-clair);">Aucune donnée disponible</p>`;
+    if (!conteneur || !matches || matches.length === 0) {
+        if (conteneur) conteneur.innerHTML = `<p style="padding:1.5rem;text-align:center;color:#64748b;">Aucun match à afficher</p>`;
         return;
     }
 
-    // Filtre statut
+    let filtres = [...matches];
     const filtreStatut = document.getElementById('filtre-statut')?.value || 'tout';
-    let filtres = matches;
-    if (filtreStatut !== 'tout') {
-        filtres = matches.filter(m => {
-            if (filtreStatut === 'avenir') return m.statut === 'avenir';
-            if (filtreStatut === 'direct') return m.statut === 'direct';
-            if (filtreStatut === 'termine') return m.statut === 'termine';
-            return true;
-        });
-    }
-
-    // Filtre ligue
     const filtreLigue = document.getElementById('filtre-ligue')?.value || 'tout';
+
+    if (filtreStatut !== 'tout') {
+        filtres = filtres.filter(m => m.statut === filtreStatut);
+    }
     if (filtreLigue !== 'tout') {
         filtres = filtres.filter(m => m.ligue === filtreLigue);
     }
@@ -159,33 +134,34 @@ function afficherTableau(idConteneur, matches) {
                     <th>Ligue</th>
                     <th>Match</th>
                     <th>Heure</th>
-                    <th>Score / Résultat</th>
+                    <th>Score</th>
                     <th>Pronostic</th>
                     <th>Validation</th>
                 </tr>
             </thead>
             <tbody>
             ${filtres.map(m => {
+                if (m.statut === 'termine' && m.scoreFinal) {
+                    m.valide = verifierProno(m);
+                }
+
                 const statutClass = m.statut === 'direct' ? 'en-direct' : m.statut === 'termine' ? 'termine' : '';
-                const statutTexte = m.statut === 'avenir' ? '<span class="statut statut-avenir">⏳ À venir</span>' :
-                                    m.statut === 'direct' ? '<span class="statut statut-direct">🔴 En direct</span>' :
-                                    '<span class="statut statut-termine">✅ Terminé</span>';
-                
-                let scoreAffiche = '';
-                if (m.statut === 'avenir') {
-                    scoreAffiche = '<span style="color:var(--texte-clair);">—</span>';
-                } else if (m.statut === 'direct' && m.score) {
+                const statutTexte = {
+                    avenir: '<span class="statut statut-avenir">⏳ À venir</span>',
+                    direct: '<span class="statut statut-direct">🔴 En direct</span>',
+                    termine: '<span class="statut statut-termine">✅ Terminé</span>'
+                }[m.statut] || '';
+
+                let scoreAffiche = '<span style="color:#94a3b8;">—</span>';
+                if (m.statut === 'direct' && m.score) {
                     scoreAffiche = `<span class="score-affiche">${m.score.eq1} - ${m.score.eq2}</span>`;
                 } else if (m.scoreFinal) {
                     scoreAffiche = `<span class="score-affiche">${m.scoreFinal}</span>`;
                 }
 
                 let validation = '<span class="badge-attente">⏳ En attente</span>';
-                if (m.valide === 'valide') {
-                    validation = '<span class="badge-valide">✔️ Correct</span>';
-                } else if (m.valide === 'invalide') {
-                    validation = '<span class="badge-invalide">❌ Manqué</span>';
-                }
+                if (m.valide === 'valide') validation = '<span class="badge-valide">✔️ Correct</span>';
+                if (m.valide === 'invalide') validation = '<span class="badge-invalide">❌ Manqué</span>';
 
                 return `
                 <tr class="${statutClass}">
@@ -194,7 +170,7 @@ function afficherTableau(idConteneur, matches) {
                     <td><strong>${m.equipe1}</strong> – ${m.equipe2}</td>
                     <td>${m.heure}</td>
                     <td>${scoreAffiche}</td>
-                    <td>${m.pronostic}<br><span class="badge conf-${m.niveau}" style="margin-top:0.25rem;display:inline-block;">${m.confiance}</span></td>
+                    <td>${m.pronostic}<br><span class="badge conf-${m.niveau}" style="margin-top:0.3rem;display:inline-block;">${m.confiance}</span></td>
                     <td class="valide-prono">${validation}</td>
                 </tr>`;
             }).join('')}
@@ -204,52 +180,64 @@ function afficherTableau(idConteneur, matches) {
 
 // --- Mise à jour résumé ---
 function mettreAJourResume() {
-    const total = donneesJour.filter(m => m.statut === 'termine').length;
+    const totalTermines = donneesJour.filter(m => m.statut === 'termine').length;
     const reussi = donneesJour.filter(m => m.valide === 'valide').length;
     const enDirect = donneesJour.filter(m => m.statut === 'direct').length;
-    const taux = total > 0 ? Math.round((reussi / total) * 100) : '—';
+    const taux = totalTermines > 0 ? Math.round((reussi / totalTermines) * 100) : '—';
 
-    const elDirect = document.getElementById('nb-en-direct');
-    const elTermine = document.getElementById('nb-termines');
-    const elTaux = document.getElementById('taux-reussite');
-    const elTotalMatchs = document.getElementById('total-matchs');
-    const elTotalReussi = document.getElementById('total-reussi');
-    const elTauxGlobal = document.getElementById('taux-global');
-
-    if (elDirect) elDirect.innerHTML = `🔴 En direct : <strong>${enDirect}</strong>`;
-    if (elTermine) elTermine.innerHTML = `✅ Terminés : <strong>${total}</strong>`;
-    if (elTaux) elTaux.innerHTML = `🎯 Taux de réussite : <strong>${taux}%</strong>`;
-    if (elTotalMatchs) elTotalMatchs.textContent = donneesJour.length;
-    if (elTotalReussi) elTotalReussi.textContent = reussi;
-    if (elTauxGlobal) elTauxGlobal.textContent = total > 0 ? `${taux}%` : '— %';
+    document.getElementById('nb-en-direct').innerHTML = `🔴 En direct : <strong>${enDirect}</strong>`;
+    document.getElementById('nb-termines').innerHTML = `✅ Terminés : <strong>${totalTermines}</strong>`;
+    document.getElementById('taux-reussite').innerHTML = `🎯 Taux : <strong>${taux}%</strong>`;
+    document.getElementById('total-matchs').textContent = donneesJour.length;
+    document.getElementById('total-reussi').textContent = reussi;
+    document.getElementById('taux-global').textContent = totalTermines > 0 ? `${taux}%` : '— %';
 }
 
-// --- Génération des coupons ---
+// --- Coupons ---
 function genererCoupons() {
-    const elevees = donneesJour.filter(m => m.niveau === 'elevee').slice(0,5);
-    const milieu = donneesJour.filter(m => m.niveau === 'moyenne').slice(0,5);
-    
+    const elevees = donneesJour.filter(m => m.niveau === 'elevee').slice(0, 5);
+    const moyennes = donneesJour.filter(m => m.niveau === 'moyenne').slice(0, 5);
+
     document.getElementById('liste-coupon-a').innerHTML = elevees.map(m => {
         let icone = '⏳';
         if (m.valide === 'valide') icone = '✔️';
         if (m.valide === 'invalide') icone = '❌';
-        return `<li><span><strong>${m.equipe1} – ${m.equipe2}</strong><br>${m.pronostic} · ${m.ligue}</span><span>${icone}</span></li>`;
-    }).join('') || '<li style="opacity:0.6;">Données en cours de chargement...</li>';
+        return `<li><span><strong>${m.equipe1} – ${m.equipe2}</strong><br>${m.pronostic}</span><span>${icone}</span></li>`;
+    }).join('');
 
-    document.getElementById('liste-coupon-b').innerHTML = milieu.map(m => {
+    document.getElementById('liste-coupon-b').innerHTML = moyennes.map(m => {
         let icone = '⏳';
         if (m.valide === 'valide') icone = '✔️';
         if (m.valide === 'invalide') icone = '❌';
-        return `<li><span><strong>${m.equipe1} – ${m.equipe2}</strong><br>${m.pronostic} · ${m.ligue}</span><span>${icone}</span></li>`;
-    }).join('') || '<li style="opacity:0.6;">Données en cours de chargement...</li>';
+        return `<li><span><strong>${m.equipe1} – ${m.equipe2}</strong><br>${m.pronostic}</span><span>${icone}</span></li>`;
+    }).join('');
 
-    // Score coupons
-    const reussiA = elevees.filter(m => m.valide === 'valide').length;
-    const reussiB = milieu.filter(m => m.valide === 'valide').length;
-    document.getElementById('score-a').innerHTML = `Réussi : <strong>${reussiA}/5</strong>`;
-    document.getElementById('score-b').innerHTML = `Réussi : <strong>${reussiB}/5</strong>`;
+    const scoreA = elevees.filter(m => m.valide === 'valide').length;
+    const scoreB = moyennes.filter(m => m.valide === 'valide').length;
+    document.getElementById('score-a').innerHTML = `Réussi : <strong>${scoreA}/5</strong>`;
+    document.getElementById('score-b').innerHTML = `Réussi : <strong>${scoreB}/5</strong>`;
 }
 
-// --- Lancement ---
+// --- Simulation temps réel ---
+function simulerMiseAJour() {
+    donneesJour.forEach(m => {
+        if (m.statut === 'direct' && m.scoreFinal === undefined) {
+            if (!m.score) m.score = { eq1: 0, eq2: 0 };
+            if (Math.random() < 0.08) {
+                Math.random() < 0.5 ? m.score.eq1++ : m.score.eq2++;
+            }
+            if (Math.random() < 0.015) {
+                m.statut = 'termine';
+                m.scoreFinal = `${m.score.eq1} - ${m.score.eq2}`;
+                m.valide = verifierProno(m);
+            }
+        }
+    });
+    afficherTableau('tableau-matchs', donneesJour);
+    genererCoupons();
+    mettreAJourResume();
+}
+
+// Lancement
 charger();
-setInterval(simulerMiseAJourDirect, 30000); // Màj toutes les 30s
+setInterval(simulerMiseAJour, 30000);
