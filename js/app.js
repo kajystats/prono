@@ -1,6 +1,24 @@
 // ==============================================
 // DONNÉES VÉRIFIÉES ET ENRICHIES
 // ==============================================
+const donneesHier = [
+  // ⚠️ Dès demain, déplace ici les matchs terminés d'hier
+  // Exemple de structure :
+  // {
+  //   "id":"exemple-hier",
+  //   "ligue":"La Liga",
+  //   "equipe1":"Équipe A", "equipe2":"Équipe B",
+  //   "heure":"--:--",
+  //   "pronostic":"1", "scoreProbable":"2-0",
+  //   "niveau":"moyenne", "confiance":"moyenne",
+  //   "statut":"termine", "scoreFinal":"2-0",
+  //   "cartonsProbables":"4-3", "cornersProbables":"8-5", "fautesProbables":"12-14",
+  //   "forme1":"Victoire, Nul, Victoire, Défaite, Victoire",
+  //   "forme2":"Nul, Défaite, Victoire, Nul, Défaite",
+  //   "analyse":"Match archivé — résultat confirmé."
+  // }
+];
+
 const donneesJour = [
   {
     "id":"aston-mancity","ligue":"Premier League",
@@ -287,7 +305,7 @@ const donneesDemain = [
 // AGENT DE VÉRIFICATION
 // ==============================================
 function verifierIntegriteDonnees() {
-    const tousLesMatchs = [...donneesJour, ...donneesDemain];
+    const tousLesMatchs = [...donneesHier, ...donneesJour, ...donneesDemain];
     let erreurs = [];
     tousLesMatchs.forEach((m) => {
         if (!m.id) erreurs.push(`Match sans ID`);
@@ -347,9 +365,12 @@ function traiterHash() {
     }
     
     const sectionMap = {
-        'jour': 'section-jour', 'demain': 'section-demain',
-        'coupons': 'section-coupons', 'historique': 'section-historique',
-        'apropos': 'section-apropos'
+        'jour': 'section-jour',
+        'hier': 'section-hier',
+        'demain': 'section-demain',
+        'coupons': 'section-coupons',
+        'historique': 'section-historique',
+        'apropos': 'section-a-propos'
     };
     
     const sectionId = sectionMap[hash] || 'section-jour';
@@ -389,16 +410,30 @@ function afficherTableau(idConteneur, matches) {
     if (!conteneur) return;
     
     if (!matches.length) {
-        conteneur.innerHTML = `<p style="padding:2rem;text-align:center;color:#64748b;">Aucun match disponible</p>`;
+        // Message spécifique pour la section "Matchs d'hier"
+        if (idConteneur === 'tableau-matchs-hier') {
+            conteneur.innerHTML = `
+                <div style="text-align:center;padding:3rem;color:#64748b;background:#f8fafc;border-radius:12px;margin:1rem 0;">
+                    <p style="font-size:1.1rem;margin:0 0 0.5rem 0;">ℹ️ Aucun match d'hier à afficher pour le moment</p>
+                    <p style="font-size:0.9rem;">Cette rubrique affichera les résultats complétés dès demain (25 octobre 2026).</p>
+                    <p style="font-size:0.85rem;margin-top:1rem;color:#94a3b8;">Le site a été lancé aujourd'hui — revenez demain pour consulter les premiers résultats archivés.</p>
+                </div>`;
+        } else {
+            conteneur.innerHTML = `<p style="padding:2rem;text-align:center;color:#64748b;">Aucun match disponible</p>`;
+        }
         return;
     }
-
+    
     let filtres = [...matches];
     const filtreStatut = document.getElementById('filtre-statut')?.value || 'tout';
     const filtreLigue = document.getElementById('filtre-ligue')?.value || 'tout';
-    if (filtreStatut !== 'tout') filtres = filtres.filter(m => m.statut === filtreStatut);
-    if (filtreLigue !== 'tout') filtres = filtres.filter(m => m.ligue === filtreLigue);
-
+    
+    // Appliquer les filtres SAUF pour la section "hier"
+    if (idConteneur !== 'tableau-matchs-hier') {
+        if (filtreStatut !== 'tout') filtres = filtres.filter(m => m.statut === filtreStatut);
+        if (filtreLigue !== 'tout') filtres = filtres.filter(m => m.ligue === filtreLigue);
+    }
+    
     conteneur.innerHTML = `
         <table>
             <thead>
@@ -421,18 +456,15 @@ function afficherTableau(idConteneur, matches) {
                     direct: '<span class="statut statut-direct">🔴 En direct</span>',
                     termine: '<span class="statut statut-termine">✅ Terminé</span>'
                 }[m.statut];
-
                 let scoreAffiche = '<span style="color:#94a3b8;">—</span>';
                 if (m.statut === 'direct' && m.score) {
                     scoreAffiche = `<span class="score-affiche">${m.score.eq1} - ${m.score.eq2}</span>`;
                 } else if (m.scoreFinal) {
                     scoreAffiche = `<span class="score-affiche" style="font-weight:700;color:#0f2744;">${m.scoreFinal}</span>`;
                 }
-
                 let validation = '<span class="badge-attente">⏳ En attente</span>';
                 if (resultat === 'valide') validation = '<span class="badge-valide">✔️ Correct</span>';
                 if (resultat === 'invalide') validation = '<span class="badge-invalide">❌ Manqué</span>';
-
                 return `
                 <tr class="${statutClass}" style="cursor:pointer;" data-hash="match/${m.id}">
                     <td>${statutTexte}</td>
@@ -446,7 +478,7 @@ function afficherTableau(idConteneur, matches) {
             }).join('')}
             </tbody>
         </table>`;
-
+    
     conteneur.querySelectorAll('tr[data-hash]').forEach(row => {
         row.addEventListener('click', () => naviguerVers(row.getAttribute('data-hash')));
     });
@@ -456,17 +488,14 @@ function afficherTableau(idConteneur, matches) {
 // PAGE DÉTAIL — ENRICHIE AVEC TOUS LES CHAMPS
 // ==============================================
 function afficherDetailMatch(matchId, pushState = true) {
-    const tousLesMatchs = [...donneesJour, ...donneesDemain];
+    const tousLesMatchs = [...donneesHier, ...donneesJour, ...donneesDemain];
     const match = tousLesMatchs.find(m => m.id === matchId);
     if (!match) return;
-
     if (pushState && getHash() !== `match/${matchId}`) {
         naviguerVers(`match/${matchId}`);
         return;
     }
-
     const resultat = verifierProno(match);
-
     let resultatReelCode = null;
     let resultatReelTexte = '—';
     if (match.scoreFinal) {
@@ -474,10 +503,8 @@ function afficherDetailMatch(matchId, pushState = true) {
         resultatReelCode = s1 > s2 ? '1' : s1 < s2 ? '2' : 'N';
         resultatReelTexte = resultatEnTexte(resultatReelCode, match.equipe1, match.equipe2);
     }
-
     let pronosticTexte = match.pronostic === '1' ? `Victoire ${match.equipe1}` :
                          match.pronostic === '2' ? `Victoire ${match.equipe2}` : 'Match nul';
-
     let verdict = '', verdictCouleur = '#f8fafc';
     if (match.statut === 'termine') {
         if (resultat === 'valide') {
@@ -488,14 +515,12 @@ function afficherDetailMatch(matchId, pushState = true) {
             verdictCouleur = '#fef2f2';
         }
     }
-
     let validationTexte = '<span class="badge-attente">⏳ En attente</span>';
     if (resultat === 'valide') validationTexte = '<span class="badge-valide">✔️ CORRECT</span>';
     if (resultat === 'invalide') validationTexte = '<span class="badge-invalide">❌ MANQUÉ</span>';
-
+    
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const sectionDetail = document.getElementById('section-detail') || creerSectionDetail();
-
     sectionDetail.innerHTML = `
         <div style="max-width:900px;margin:0 auto;padding:2rem 1rem;">
             <button class="btn-retour" style="background:none;border:none;color:#10b981;font-size:1rem;cursor:pointer;padding:0.5rem 0;margin-bottom:1.5rem;">← Retour aux matchs</button>
@@ -512,7 +537,6 @@ function afficherDetailMatch(matchId, pushState = true) {
                       '⏳ À venir'}
                 </p>
             </div>
-
             <div style="background:#fff;padding:2rem;border-radius:0 0 16px 16px;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
                 <!-- SCORES -->
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-bottom:2rem;">
@@ -527,7 +551,6 @@ function afficherDetailMatch(matchId, pushState = true) {
                         <p style="margin-top:0.5rem;font-size:0.9rem;color:#22c55e;">${resultatReelTexte}</p>
                     </div>
                 </div>
-
                 <!-- VERDICT -->
                 ${match.statut === 'termine' ? `
                 <div style="padding:1.5rem;border-radius:12px;background:${verdictCouleur};margin-bottom:2rem;text-align:center;border:2px solid ${resultat === 'valide' ? '#22c55e' : '#ef4444'};">
@@ -539,7 +562,6 @@ function afficherDetailMatch(matchId, pushState = true) {
                     <p style="font-size:1.2rem;font-weight:600;margin:0;color:#64748b;">⏳ En attente du résultat final</p>
                 </div>
                 `}
-
                 <!-- STATISTIQUES AVANT MATCH -->
                 <div style="margin-bottom:2rem;">
                     <h3 style="color:#0f2744;margin-bottom:1rem;font-size:1.2rem;">📈 Statistiques attendues</h3>
@@ -558,7 +580,6 @@ function afficherDetailMatch(matchId, pushState = true) {
                         </div>
                     </div>
                 </div>
-
                 <!-- FORME DES ÉQUIPES -->
                 <div style="margin-bottom:2rem;">
                     <h3 style="color:#0f2744;margin-bottom:1rem;font-size:1.2rem;">🔥 Forme des équipes (5 derniers matchs)</h3>
@@ -583,13 +604,11 @@ function afficherDetailMatch(matchId, pushState = true) {
                         </div>
                     </div>
                 </div>
-
                 <!-- NIVEAU DE CONFIANCE -->
                 <div style="margin-bottom:2rem;">
                     <h3 style="color:#0f2744;margin-bottom:0.5rem;">🎯 Niveau de confiance</h3>
                     <span class="badge conf-${match.niveau}" style="font-size:1rem;padding:0.5rem 1rem;border-radius:8px;">${match.confiance}</span>
                 </div>
-
                 <!-- ANALYSE -->
                 <div>
                     <h3 style="color:#0f2744;margin-bottom:1rem;">📊 Analyse du match</h3>
@@ -597,7 +616,6 @@ function afficherDetailMatch(matchId, pushState = true) {
                 </div>
             </div>
         </div>`;
-
     sectionDetail.classList.add('active');
 }
 
@@ -628,7 +646,7 @@ function mettreAJourResume() {
     const elTotalMatchs = document.getElementById('total-matchs');
     const elTotalReussi = document.getElementById('total-reussi');
     const elTauxGlobal = document.getElementById('taux-global');
-
+    
     if (elDirect) elDirect.innerHTML = `🔴 En direct : <strong>${stats.enDirect.length}</strong>`;
     if (elTermine) elTermine.innerHTML = `✅ Terminés : <strong>${stats.termines.length}</strong>`;
     if (elTaux) elTaux.innerHTML = `🎯 Taux : <strong>${stats.taux || '—'}%</strong>`;
@@ -643,30 +661,30 @@ function mettreAJourResume() {
 function genererCoupons() {
     const elevees = donneesJour.filter(m => m.niveau === 'elevee').slice(0, 5);
     const moyennes = donneesJour.filter(m => m.niveau === 'moyenne').slice(0, 5);
-
     const contA = document.getElementById('liste-coupon-a');
     const contB = document.getElementById('liste-coupon-b');
-
+    
     if (contA) contA.innerHTML = elevees.map(m => {
         const res = verifierProno(m);
         const icone = res === 'valide' ? '✔️' : res === 'invalide' ? '❌' : '⏳';
         return `<li style="cursor:pointer;" data-hash="match/${m.id}"><span><strong>${m.equipe1} – ${m.equipe2}</strong><br>${m.scoreProbable}</span><span style="font-size:1.3rem;">${icone}</span></li>`;
     }).join('');
-
+    
     if (contB) contB.innerHTML = moyennes.map(m => {
         const res = verifierProno(m);
         const icone = res === 'valide' ? '✔️' : res === 'invalide' ? '❌' : '⏳';
         return `<li style="cursor:pointer;" data-hash="match/${m.id}"><span><strong>${m.equipe1} – ${m.equipe2}</strong><br>${m.scoreProbable}</span><span style="font-size:1.3rem;">${icone}</span></li>`;
     }).join('');
-
+    
     document.querySelectorAll('#liste-coupon-a li, #liste-coupon-b li').forEach(li => {
         li.addEventListener('click', () => naviguerVers(li.getAttribute('data-hash')));
     });
-
+    
     const scoreA = elevees.filter(m => verifierProno(m) === 'valide').length;
     const scoreB = moyennes.filter(m => verifierProno(m) === 'valide').length;
     const elScoreA = document.getElementById('score-a');
     const elScoreB = document.getElementById('score-b');
+    
     if (elScoreA) elScoreA.innerHTML = `Réussi : <strong>${scoreA}/5</strong>`;
     if (elScoreB) elScoreB.innerHTML = `Réussi : <strong>${scoreB}/5</strong>`;
 }
@@ -687,6 +705,7 @@ function simulerMiseAJour() {
         }
     });
     afficherTableau('tableau-matchs', donneesJour);
+    afficherTableau('tableau-matchs-hier', donneesHier);
     afficherTableau('tableau-matchs-demain', donneesDemain);
     genererCoupons();
     mettreAJourResume();
@@ -699,6 +718,7 @@ window.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 KAJY STATS — Chargement complet...');
     verifierIntegriteDonnees();
     afficherTableau('tableau-matchs', donneesJour);
+    afficherTableau('tableau-matchs-hier', donneesHier);
     afficherTableau('tableau-matchs-demain', donneesDemain);
     genererCoupons();
     mettreAJourResume();
