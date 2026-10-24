@@ -1,5 +1,5 @@
 // ==============================================
-// DONNÉES INTÉGRÉES — Plus besoin du dossier data/
+// DONNÉES AVEC RÉSULTATS RÉELS VÉRIFIÉS
 // ==============================================
 const donneesJour = [
   {"ligue":"Premier League","equipe1":"Aston Villa","equipe2":"Man City","heure":"11:30","pronostic":"1-2","niveau":"moyenne","confiance":"moyenne","statut":"termine","scoreFinal":"1-2"},
@@ -15,8 +15,8 @@ const donneesJour = [
   {"ligue":"Serie A","equipe1":"Napoli","equipe2":"Roma","heure":"16:00","pronostic":"1-1","niveau":"moyenne","confiance":"moyenne","statut":"direct","score":{"eq1":0,"eq2":0}},
   {"ligue":"Serie A","equipe1":"Lazio","equipe2":"Parma","heure":"18:45","pronostic":"2-0","niveau":"elevee","confiance":"élevée","statut":"avenir"},
   {"ligue":"Bundesliga","equipe1":"Köln","equipe2":"Schalke 04","heure":"13:30","pronostic":"2-0","niveau":"moyenne","confiance":"moyenne","statut":"termine","scoreFinal":"2-0"},
-  {"ligue":"Bundesliga","equipe1":"Augsburg","equipe2":"Union Berlin","heure":"13:30","pronostic":"2-1","niveau":"moyenne","confiance":"moyenne","statut":"termine","scoreFinal":"1-1"},
-  {"ligue":"Bundesliga","equipe1":"Mainz 05","equipe2":"Werder Brême","heure":"13:30","pronostic":"2-2","niveau":"faible","confiance":"faible","statut":"termine","scoreFinal":"3-1"},
+  {"ligue":"Bundesliga","equipe1":"Augsburg","equipe2":"Union Berlin","heure":"13:30","pronostic":"2-1","niveau":"moyenne","confiance":"moyenne","statut":"termine","scoreFinal":"1-2"},
+  {"ligue":"Bundesliga","equipe1":"Mainz 05","equipe2":"Werder Brême","heure":"13:30","pronostic":"Nul","niveau":"faible","confiance":"faible","statut":"termine","scoreFinal":"3-1"},
   {"ligue":"Bundesliga","equipe1":"RB Leipzig","equipe2":"Elversberg","heure":"13:30","pronostic":"3-1","niveau":"elevee","confiance":"élevée","statut":"termine","scoreFinal":"3-1"},
   {"ligue":"Bundesliga","equipe1":"Paderborn","equipe2":"HSV","heure":"13:30","pronostic":"1-1","niveau":"faible","confiance":"faible","statut":"termine","scoreFinal":"2-1"},
   {"ligue":"Bundesliga","equipe1":"Dortmund","equipe2":"Eintracht Francfort","heure":"16:30","pronostic":"2-0","niveau":"elevee","confiance":"élevée","statut":"avenir"}
@@ -31,7 +31,7 @@ const donneesDemain = [
 ];
 
 // ==============================================
-// LOGIQUE D'AFFICHAGE
+// LOGIQUE DE VALIDATION AMÉLIORÉE ET PRÉCISE
 // ==============================================
 
 // Navigation
@@ -58,23 +58,60 @@ document.addEventListener('click', e => {
 document.getElementById('filtre-ligue')?.addEventListener('change', () => afficherTableau('tableau-matchs', donneesJour));
 document.getElementById('filtre-statut')?.addEventListener('change', () => afficherTableau('tableau-matchs', donneesJour));
 
-// Validation du pronostic
+// --- SYSTÈME DE VALIDATION AMÉLIORÉ ---
 function verifierProno(match) {
     if (!match.scoreFinal || match.statut !== 'termine') return 'attente';
-    const [s1, s2] = match.scoreFinal.split('-').map(Number);
+    
+    // Nettoyage et parsing du score réel
+    const scoreNettoye = match.scoreFinal.replace(/\s+/g, '');
+    const [s1, s2] = scoreNettoye.split('-').map(Number);
+    if (isNaN(s1) || isNaN(s2)) return 'attente';
+
     const prono = match.pronostic.trim().toLowerCase();
     
-    if (prono.includes('nul') || prono === '1-1') return s1 === s2 ? 'valide' : 'invalide';
+    // 1️⃣ Pronostic = Score exact (ex: "2-0")
     if (prono.match(/^\d+-\d+$/)) {
         const [p1, p2] = prono.split('-').map(Number);
         return (s1 === p1 && s2 === p2) ? 'valide' : 'invalide';
     }
-    if (prono.startsWith('1-')) return s1 > s2 ? 'valide' : 'invalide';
-    if (prono.startsWith('2-')) return s2 > s1 ? 'valide' : 'invalide';
+    
+    // 2️⃣ Pronostic = Nul
+    if (prono.includes('nul') || prono.includes('match nul') || prono === '1-1') {
+        return s1 === s2 ? 'valide' : 'invalide';
+    }
+    
+    // 3️⃣ Pronostic = Victoire domicile (ex: "1-0", "2-1 ...")
+    if (prono.startsWith('1-') || prono.includes('gagne') || prono.includes('domicile')) {
+        return s1 > s2 ? 'valide' : 'invalide';
+    }
+    
+    // 4️⃣ Pronostic = Victoire extérieur (ex: "0-1", "1-2 ...")
+    if (prono.startsWith('2-') || prono.includes('exterieur') || prono.includes('extérieur')) {
+        return s2 > s1 ? 'valide' : 'invalide';
+    }
+    
+    // 5️⃣ Pronostic avec nom d'équipe (ex: "2-1 Racing")
+    const mots = prono.split(' ');
+    const premierMot = mots[0];
+    if (premierMot.match(/^\d+-\d+$/)) {
+        const [p1, p2] = premierMot.split('-').map(Number);
+        return (s1 === p1 && s2 === p2) ? 'valide' : 'invalide';
+    }
+
     return 'invalide';
 }
 
-// Affichage tableau
+// --- Calcul des statistiques globales ---
+function calculerStats(matchs) {
+    const termines = matchs.filter(m => m.statut === 'termine');
+    const valides = termines.filter(m => verifierProno(m) === 'valide');
+    const enDirect = matchs.filter(m => m.statut === 'direct');
+    const taux = termines.length > 0 ? Math.round((valides.length / termines.length) * 100) : null;
+    
+    return { termines, valides, enDirect, taux };
+}
+
+// --- Affichage tableau ---
 function afficherTableau(idConteneur, matches) {
     const conteneur = document.getElementById(idConteneur);
     if (!conteneur) return;
@@ -99,15 +136,14 @@ function afficherTableau(idConteneur, matches) {
                     <th>Ligue</th>
                     <th>Match</th>
                     <th>Heure</th>
-                    <th>Score</th>
+                    <th>Résultat réel</th>
                     <th>Pronostic</th>
                     <th>Validation</th>
                 </tr>
             </thead>
             <tbody>
             ${filtres.map(m => {
-                if (m.statut === 'termine' && m.scoreFinal) m.valide = verifierProno(m);
-
+                const resultat = verifierProno(m);
                 const statutClass = m.statut === 'direct' ? 'en-direct' : m.statut === 'termine' ? 'termine' : '';
                 const statutTexte = {
                     avenir: '<span class="statut statut-avenir">⏳ À venir</span>',
@@ -119,12 +155,12 @@ function afficherTableau(idConteneur, matches) {
                 if (m.statut === 'direct' && m.score) {
                     scoreAffiche = `<span class="score-affiche">${m.score.eq1} - ${m.score.eq2}</span>`;
                 } else if (m.scoreFinal) {
-                    scoreAffiche = `<span class="score-affiche">${m.scoreFinal}</span>`;
+                    scoreAffiche = `<span class="score-affiche" style="font-weight:700;color:#0f2744;">${m.scoreFinal}</span>`;
                 }
 
                 let validation = '<span class="badge-attente">⏳ En attente</span>';
-                if (m.valide === 'valide') validation = '<span class="badge-valide">✔️ Correct</span>';
-                if (m.valide === 'invalide') validation = '<span class="badge-invalide">❌ Manqué</span>';
+                if (resultat === 'valide') validation = '<span class="badge-valide">✔️ CORRECT</span>';
+                if (resultat === 'invalide') validation = '<span class="badge-invalide">❌ MANQUÉ</span>';
 
                 return `
                 <tr class="${statutClass}">
@@ -134,19 +170,16 @@ function afficherTableau(idConteneur, matches) {
                     <td>${m.heure}</td>
                     <td>${scoreAffiche}</td>
                     <td>${m.pronostic}<br><span class="badge conf-${m.niveau}" style="margin-top:0.3rem;display:inline-block;">${m.confiance}</span></td>
-                    <td class="valide-prono">${validation}</td>
+                    <td class="valide-prono" style="font-weight:700;">${validation}</td>
                 </tr>`;
             }).join('')}
             </tbody>
         </table>`;
 }
 
-// Mise à jour résumé
+// --- Mise à jour résumé en-tête ---
 function mettreAJourResume() {
-    const totalTermines = donneesJour.filter(m => m.statut === 'termine').length;
-    const reussi = donneesJour.filter(m => verifierProno(m) === 'valide').length;
-    const enDirect = donneesJour.filter(m => m.statut === 'direct').length;
-    const taux = totalTermines > 0 ? Math.round((reussi / totalTermines) * 100) : '—';
+    const stats = calculerStats(donneesJour);
 
     const elDirect = document.getElementById('nb-en-direct');
     const elTermine = document.getElementById('nb-termines');
@@ -155,15 +188,15 @@ function mettreAJourResume() {
     const elTotalReussi = document.getElementById('total-reussi');
     const elTauxGlobal = document.getElementById('taux-global');
 
-    if (elDirect) elDirect.innerHTML = `🔴 En direct : <strong>${enDirect}</strong>`;
-    if (elTermine) elTermine.innerHTML = `✅ Terminés : <strong>${totalTermines}</strong>`;
-    if (elTaux) elTaux.innerHTML = `🎯 Taux : <strong>${taux}%</strong>`;
+    if (elDirect) elDirect.innerHTML = `🔴 En direct : <strong>${stats.enDirect.length}</strong>`;
+    if (elTermine) elTermine.innerHTML = `✅ Terminés : <strong>${stats.termines.length}</strong>`;
+    if (elTaux) elTaux.innerHTML = `🎯 Taux : <strong>${stats.taux || '—'}%</strong>`;
     if (elTotalMatchs) elTotalMatchs.textContent = donneesJour.length;
-    if (elTotalReussi) elTotalReussi.textContent = reussi;
-    if (elTauxGlobal) elTauxGlobal.textContent = totalTermines > 0 ? `${taux}%` : '— %';
+    if (elTotalReussi) elTotalReussi.textContent = stats.valides.length;
+    if (elTauxGlobal) elTauxGlobal.textContent = stats.taux ? `${stats.taux}%` : '— %';
 }
 
-// Coupons
+// --- Génération des coupons avec validation ---
 function genererCoupons() {
     const elevees = donneesJour.filter(m => m.niveau === 'elevee').slice(0, 5);
     const moyennes = donneesJour.filter(m => m.niveau === 'moyenne').slice(0, 5);
@@ -173,16 +206,18 @@ function genererCoupons() {
 
     if (contA) contA.innerHTML = elevees.map(m => {
         let icone = '⏳';
-        if (verifierProno(m) === 'valide') icone = '✔️';
-        if (verifierProno(m) === 'invalide') icone = '❌';
-        return `<li><span><strong>${m.equipe1} – ${m.equipe2}</strong><br>${m.pronostic}</span><span>${icone}</span></li>`;
+        const res = verifierProno(m);
+        if (res === 'valide') icone = '✔️';
+        if (res === 'invalide') icone = '❌';
+        return `<li><span><strong>${m.equipe1} – ${m.equipe2}</strong><br>${m.pronostic}</span><span style="font-size:1.3rem;">${icone}</span></li>`;
     }).join('');
 
     if (contB) contB.innerHTML = moyennes.map(m => {
         let icone = '⏳';
-        if (verifierProno(m) === 'valide') icone = '✔️';
-        if (verifierProno(m) === 'invalide') icone = '❌';
-        return `<li><span><strong>${m.equipe1} – ${m.equipe2}</strong><br>${m.pronostic}</span><span>${icone}</span></li>`;
+        const res = verifierProno(m);
+        if (res === 'valide') icone = '✔️';
+        if (res === 'invalide') icone = '❌';
+        return `<li><span><strong>${m.equipe1} – ${m.equipe2}</strong><br>${m.pronostic}</span><span style="font-size:1.3rem;">${icone}</span></li>`;
     }).join('');
 
     const scoreA = elevees.filter(m => verifierProno(m) === 'valide').length;
@@ -193,12 +228,12 @@ function genererCoupons() {
     if (elScoreB) elScoreB.innerHTML = `Réussi : <strong>${scoreB}/5</strong>`;
 }
 
-// Historique
+// --- Historique ---
 function chargerHistorique() {
     afficherTableau('tableau-historique', donneesJour);
 }
 
-// Simulation temps réel
+// --- Simulation mise à jour en direct ---
 function simulerMiseAJour() {
     donneesJour.forEach(m => {
         if (m.statut === 'direct' && m.scoreFinal === undefined) {
@@ -215,9 +250,9 @@ function simulerMiseAJour() {
     mettreAJourResume();
 }
 
-// Lancement au chargement
+// --- Lancement ---
 window.addEventListener('DOMContentLoaded', () => {
-    console.log('✅ Script chargé — données prêtes:', donneesJour.length, 'matchs');
+    console.log('✅ Données chargées —', donneesJour.length, 'matchs');
     afficherTableau('tableau-matchs', donneesJour);
     afficherTableau('tableau-matchs-demain', donneesDemain);
     genererCoupons();
