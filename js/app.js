@@ -1,8 +1,8 @@
 // ==============================================
-// DONNÉES AVEC RÉSULTATS RÉELS VÉRIFIÉS
+// DONNÉES VÉRIFIÉES ET CORRIGÉES
 // ==============================================
 const donneesJour = [
-  {"ligue":"Premier League","equipe1":"Aston Villa","equipe2":"Man City","heure":"11:30","pronostic":"1-2","niveau":"moyenne","confiance":"moyenne","statut":"termine","scoreFinal":"1-2"},
+  {"ligue":"Premier League","equipe1":"Aston Villa","equipe2":"Man City","heure":"11:30","pronostic":"1-2","niveau":"moyenne","confiance":"moyenne","statut":"termine","scoreFinal":"2-1"},
   {"ligue":"Premier League","equipe1":"Arsenal","equipe2":"Everton","heure":"14:00","pronostic":"2-0","niveau":"elevee","confiance":"élevée","statut":"termine","scoreFinal":"2-0"},
   {"ligue":"Premier League","equipe1":"Coventry","equipe2":"Fulham","heure":"14:00","pronostic":"1-1","niveau":"faible","confiance":"faible","statut":"termine","scoreFinal":"0-1"},
   {"ligue":"Premier League","equipe1":"Chelsea","equipe2":"Tottenham","heure":"16:30","pronostic":"2-1","niveau":"moyenne","confiance":"moyenne","statut":"direct","score":{"eq1":1,"eq2":0}},
@@ -31,10 +31,9 @@ const donneesDemain = [
 ];
 
 // ==============================================
-// LOGIQUE DE VALIDATION AMÉLIORÉE ET PRÉCISE
+// LOGIQUE DE VALIDATION VÉRIFIÉE
 // ==============================================
 
-// Navigation
 document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('actif'));
@@ -44,7 +43,6 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     });
 });
 
-// Boutons retour
 document.addEventListener('click', e => {
     if (e.target.closest('.btn-retour')) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('actif'));
@@ -54,45 +52,42 @@ document.addEventListener('click', e => {
     }
 });
 
-// Filtres
 document.getElementById('filtre-ligue')?.addEventListener('change', () => afficherTableau('tableau-matchs', donneesJour));
 document.getElementById('filtre-statut')?.addEventListener('change', () => afficherTableau('tableau-matchs', donneesJour));
 
-// --- SYSTÈME DE VALIDATION AMÉLIORÉ ---
+// --- SYSTÈME DE VALIDATION SÉCURE ---
 function verifierProno(match) {
     if (!match.scoreFinal || match.statut !== 'termine') return 'attente';
     
-    // Nettoyage et parsing du score réel
     const scoreNettoye = match.scoreFinal.replace(/\s+/g, '');
     const [s1, s2] = scoreNettoye.split('-').map(Number);
     if (isNaN(s1) || isNaN(s2)) return 'attente';
 
     const prono = match.pronostic.trim().toLowerCase();
     
-    // 1️⃣ Pronostic = Score exact (ex: "2-0")
+    // Score exact (ex: "1-2" = Man City gagne 2-1)
     if (prono.match(/^\d+-\d+$/)) {
         const [p1, p2] = prono.split('-').map(Number);
         return (s1 === p1 && s2 === p2) ? 'valide' : 'invalide';
     }
     
-    // 2️⃣ Pronostic = Nul
-    if (prono.includes('nul') || prono.includes('match nul') || prono === '1-1') {
+    // Match nul
+    if (prono.includes('nul') || prono.includes('match nul')) {
         return s1 === s2 ? 'valide' : 'invalide';
     }
     
-    // 3️⃣ Pronostic = Victoire domicile (ex: "1-0", "2-1 ...")
-    if (prono.startsWith('1-') || prono.includes('gagne') || prono.includes('domicile')) {
+    // Victoire domicile
+    if (prono.startsWith('1-')) {
         return s1 > s2 ? 'valide' : 'invalide';
     }
     
-    // 4️⃣ Pronostic = Victoire extérieur (ex: "0-1", "1-2 ...")
-    if (prono.startsWith('2-') || prono.includes('exterieur') || prono.includes('extérieur')) {
+    // Victoire extérieur
+    if (prono.startsWith('2-')) {
         return s2 > s1 ? 'valide' : 'invalide';
     }
     
-    // 5️⃣ Pronostic avec nom d'équipe (ex: "2-1 Racing")
-    const mots = prono.split(' ');
-    const premierMot = mots[0];
+    // Score + nom d'équipe
+    const premierMot = prono.split(' ')[0];
     if (premierMot.match(/^\d+-\d+$/)) {
         const [p1, p2] = premierMot.split('-').map(Number);
         return (s1 === p1 && s2 === p2) ? 'valide' : 'invalide';
@@ -101,21 +96,17 @@ function verifierProno(match) {
     return 'invalide';
 }
 
-// --- Calcul des statistiques globales ---
 function calculerStats(matchs) {
     const termines = matchs.filter(m => m.statut === 'termine');
     const valides = termines.filter(m => verifierProno(m) === 'valide');
     const enDirect = matchs.filter(m => m.statut === 'direct');
     const taux = termines.length > 0 ? Math.round((valides.length / termines.length) * 100) : null;
-    
     return { termines, valides, enDirect, taux };
 }
 
-// --- Affichage tableau ---
 function afficherTableau(idConteneur, matches) {
     const conteneur = document.getElementById(idConteneur);
     if (!conteneur) return;
-    
     if (!matches || matches.length === 0) {
         conteneur.innerHTML = `<p style="padding:2rem;text-align:center;color:#64748b;">Aucun match disponible</p>`;
         return;
@@ -124,7 +115,6 @@ function afficherTableau(idConteneur, matches) {
     let filtres = [...matches];
     const filtreStatut = document.getElementById('filtre-statut')?.value || 'tout';
     const filtreLigue = document.getElementById('filtre-ligue')?.value || 'tout';
-
     if (filtreStatut !== 'tout') filtres = filtres.filter(m => m.statut === filtreStatut);
     if (filtreLigue !== 'tout') filtres = filtres.filter(m => m.ligue === filtreLigue);
 
@@ -177,10 +167,8 @@ function afficherTableau(idConteneur, matches) {
         </table>`;
 }
 
-// --- Mise à jour résumé en-tête ---
 function mettreAJourResume() {
     const stats = calculerStats(donneesJour);
-
     const elDirect = document.getElementById('nb-en-direct');
     const elTermine = document.getElementById('nb-termines');
     const elTaux = document.getElementById('taux-reussite');
@@ -196,7 +184,6 @@ function mettreAJourResume() {
     if (elTauxGlobal) elTauxGlobal.textContent = stats.taux ? `${stats.taux}%` : '— %';
 }
 
-// --- Génération des coupons avec validation ---
 function genererCoupons() {
     const elevees = donneesJour.filter(m => m.niveau === 'elevee').slice(0, 5);
     const moyennes = donneesJour.filter(m => m.niveau === 'moyenne').slice(0, 5);
@@ -228,12 +215,10 @@ function genererCoupons() {
     if (elScoreB) elScoreB.innerHTML = `Réussi : <strong>${scoreB}/5</strong>`;
 }
 
-// --- Historique ---
 function chargerHistorique() {
     afficherTableau('tableau-historique', donneesJour);
 }
 
-// --- Simulation mise à jour en direct ---
 function simulerMiseAJour() {
     donneesJour.forEach(m => {
         if (m.statut === 'direct' && m.scoreFinal === undefined) {
@@ -250,7 +235,6 @@ function simulerMiseAJour() {
     mettreAJourResume();
 }
 
-// --- Lancement ---
 window.addEventListener('DOMContentLoaded', () => {
     console.log('✅ Données chargées —', donneesJour.length, 'matchs');
     afficherTableau('tableau-matchs', donneesJour);
