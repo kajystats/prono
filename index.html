@@ -27,6 +27,7 @@
             
             <nav>
                 <button id="nav-jour" class="nav-btn actif">📅 Matchs du jour</button>
+                <button id="nav-hier" class="nav-btn">📋 Matchs d'hier</button>
                 <button id="nav-demain" class="nav-btn">🔮 Demain</button>
                 <button id="nav-coupons" class="nav-btn">🎟️ Coupons</button>
                 <button id="nav-historique" class="nav-btn">📊 Historique</button>
@@ -68,12 +69,27 @@
             </div>
             <div id="tableau-matchs"></div>
         </section>
+
+        <!-- Section : Matchs d'hier -->
+        <section id="section-hier" class="page">
+            <button class="btn-retour" data-retour="jour">← Retour</button>
+            <h2>📋 Matchs d'hier — <span id="date-hier">23 octobre 2026</span></h2>
+            <div id="tableau-matchs-hier">
+                <div style="text-align:center;padding:3rem;color:#64748b;background:#f8fafc;border-radius:12px;margin:1rem 0;">
+                    <p style="font-size:1.1rem;margin:0 0 0.5rem 0;">ℹ️ Aucun match d'hier à afficher pour le moment</p>
+                    <p style="font-size:0.9rem;">Cette rubrique affichera les résultats complétés dès demain (25 octobre 2026).</p>
+                    <p style="font-size:0.85rem;margin-top:1rem;color:#94a3b8;">Le site a été lancé aujourd'hui — revenez demain pour consulter les premiers résultats archivés.</p>
+                </div>
+            </div>
+        </section>
+
         <!-- Section : Demain -->
         <section id="section-demain" class="page">
             <button class="btn-retour" data-retour="jour">← Retour</button>
             <h2>🔮 Matchs de demain — <span id="date-demain">25 octobre 2026</span></h2>
             <div id="tableau-matchs-demain"></div>
         </section>
+
         <!-- Section : Coupons -->
         <section id="section-coupons" class="page">
             <button class="btn-retour" data-retour="jour">← Retour</button>
@@ -96,6 +112,7 @@
                 </div>
             </div>
         </section>
+
         <!-- Section : Historique -->
         <section id="section-historique" class="page">
             <button class="btn-retour" data-retour="jour">← Retour</button>
@@ -125,6 +142,7 @@
             </div>
             <div id="tableau-historique"></div>
         </section>
+
         <!-- Section : À propos -->
         <section id="section-a-propos" class="page">
             <button class="btn-retour" data-retour="jour">← Retour</button>
