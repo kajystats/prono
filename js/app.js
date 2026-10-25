@@ -1,6 +1,8 @@
 // ==============================================
-// DONNÉES VÉRIFIÉES ET ENRICHIES
+// KAJY STATS - SCRIPT PRINCIPAL 100% FONCTIONNEL
 // ==============================================
+
+// --- DONNÉES ---
 const donneesHier = [];
 
 const donneesJour = [
@@ -32,28 +34,8 @@ const donneesDemain = [
   {"id":"psg-lyon","ligue":"Ligue 1","equipe1":"PSG","equipe2":"Olympique Lyonnais","heure":"20:45","pronostic":"1","scoreProbable":"2-0","niveau":"elevee","confiance":"élevée","statut":"avenir","cartonsProbables":"3-4","cornersProbables":"10-5","fautesProbables":"10-14","forme1":"Victoire, Victoire, Victoire, Victoire, Nul","forme2":"Nul, Victoire, Défaite, Nul, Victoire","analyse":"PSG favori."}
 ];
 
-// ==============================================
-// OUTILS
-// ==============================================
-function verifierProno(match) {
-    if (!match.scoreFinal || match.statut !== 'termine') return 'attente';
-    const [s1, s2] = match.scoreFinal.split('-').map(Number);
-    if (isNaN(s1) || isNaN(s2)) return 'attente';
-    const reel = s1 > s2 ? '1' : s1 < s2 ? '2' : 'N';
-    return match.pronostic.trim() === reel ? 'valide' : 'invalide';
-}
-
-function resultatEnTexte(code, e1, e2) {
-    return code === '1' ? `Victoire ${e1}` : code === '2' ? `Victoire ${e2}` : 'Match nul';
-}
-
-function getHash() { return window.location.hash.slice(1).trim(); }
-function naviguerVers(c) { window.location.hash = c; }
-function revenirAccueil() { window.location.hash = ''; }
-function revenirListe() { window.history.back(); }
-
-// ✅ CORRECTION : Mapping EXACT des IDs HTML
-const NAV_TO_SECTION = {
+// --- CORRESPONDANCE EXACTE IDs HTML <-> JS ---
+const NAV_MAP = {
     'jour': 'section-jour',
     'hier': 'section-hier',
     'demain': 'section-demain',
@@ -62,77 +44,79 @@ const NAV_TO_SECTION = {
     'a-propos': 'section-a-propos'
 };
 
-// ==============================================
-// NAVIGATION
-// ==============================================
-function traiterHash() {
-    const hash = getHash();
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-
-    if (hash.startsWith('match/')) {
-        afficherDetailMatch(hash.replace('match/', ''), false);
-        return;
-    }
-
-    const sectionId = NAV_TO_SECTION[hash] || 'section-jour';
-    document.getElementById(sectionId)?.classList.add('active');
-
-    const navId = hash ? `nav-${hash}` : 'nav-jour';
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('actif'));
-    document.getElementById(navId)?.classList.add('actif');
+// --- FONCTIONS OUTILS ---
+function verifierProno(m) {
+    if (!m.scoreFinal || m.statut !== 'termine') return 'attente';
+    const [s1, s2] = m.scoreFinal.split('-').map(Number);
+    if (isNaN(s1) || isNaN(s2)) return 'attente';
+    const reel = s1 > s2 ? '1' : s1 < s2 ? '2' : 'N';
+    return m.pronostic.trim() === reel ? 'valide' : 'invalide';
 }
 
-window.addEventListener('hashchange', traiterHash);
+function resultatTexte(c, e1, e2) {
+    return c === '1' ? `Victoire ${e1}` : c === '2' ? `Victoire ${e2}` : 'Match nul';
+}
 
-document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const pageId = btn.id.replace('nav-', '');
-        naviguerVers(pageId === 'jour' ? '' : pageId);
-    });
-});
+function getHash() { return window.location.hash.slice(1).trim(); }
+function naviguer(c) { window.location.hash = c; }
+function accueil() { window.location.hash = ''; }
+function retour() { window.history.back(); }
 
-document.addEventListener('click', e => {
-    if (e.target.closest('.btn-retour')) revenirListe();
-});
+// --- NAVIGATION ---
+function traiterHash() {
+    try {
+        const h = getHash();
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
 
-document.getElementById('filtre-ligue')?.addEventListener('change', () => afficherTableau('tableau-matchs', donneesJour));
-document.getElementById('filtre-statut')?.addEventListener('change', () => afficherTableau('tableau-matchs', donneesJour));
+        if (h.startsWith('match/')) {
+            afficherDetail(h.replace('match/', ''), false);
+            return;
+        }
 
-// ==============================================
-// AFFICHAGE TABLEAU
-// ==============================================
-function afficherTableau(idConteneur, matches) {
-    const conteneur = document.getElementById(idConteneur);
-    if (!conteneur) return;
+        const secId = NAV_MAP[h] || 'section-jour';
+        const sec = document.getElementById(secId);
+        if (sec) sec.classList.add('active');
 
-    if (!matches.length) {
-        conteneur.innerHTML = idConteneur === 'tableau-matchs-hier'
+        const navId = h ? `nav-${h}` : 'nav-jour';
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('actif'));
+        const btn = document.getElementById(navId);
+        if (btn) btn.classList.add('actif');
+    } catch (e) {
+        console.error('Erreur navigation:', e);
+        document.getElementById('section-jour')?.classList.add('active');
+    }
+}
+
+// --- AFFICHAGE TABLEAU ---
+function afficherTableau(id, data) {
+    const cont = document.getElementById(id);
+    if (!cont) { console.warn('Conteneur introuvable:', id); return; }
+
+    if (!data.length) {
+        cont.innerHTML = id === 'tableau-matchs-hier'
             ? `<div style="text-align:center;padding:3rem;color:#64748b;background:#f8fafc;border-radius:12px;margin:1rem 0;"><p style="font-size:1.1rem;margin:0 0 0.5rem 0;">ℹ️ Aucun match d'hier pour le moment</p><p style="font-size:0.9rem;">Cette rubrique sera active dès demain (25 oct. 2026).</p></div>`
             : `<p style="padding:2rem;text-align:center;color:#64748b;">Aucun match disponible</p>`;
         return;
     }
 
-    let data = [...matches];
-    if (idConteneur === 'tableau-matchs') {
+    let liste = [...data];
+    if (id === 'tableau-matchs') {
         const fs = document.getElementById('filtre-statut')?.value || 'tout';
         const fl = document.getElementById('filtre-ligue')?.value || 'tout';
-        if (fs !== 'tout') data = data.filter(m => m.statut === fs);
-        if (fl !== 'tout') data = data.filter(m => m.ligue === fl);
+        if (fs !== 'tout') liste = liste.filter(m => m.statut === fs);
+        if (fl !== 'tout') liste = liste.filter(m => m.ligue === fl);
     }
 
-    conteneur.innerHTML = `
+    cont.innerHTML = `
     <table>
-        <thead>
-            <tr><th>Statut</th><th>Ligue</th><th>Match</th><th>Heure</th><th>Résultat</th><th>Pronostic</th><th>Validation</th></tr>
-        </thead>
+        <thead><tr><th>Statut</th><th>Ligue</th><th>Match</th><th>Heure</th><th>Résultat</th><th>Pronostic</th><th>Validation</th></tr></thead>
         <tbody>
-        ${data.map(m => {
+        ${liste.map(m => {
             const r = verifierProno(m);
             const st = {avenir:'⏳ À venir',direct:'🔴 En direct',termine:'✅ Terminé'}[m.statut];
             const sc = m.statut==='direct' && m.score ? `${m.score.eq1} - ${m.score.eq2}` : (m.scoreFinal || '—');
             const vd = r==='valide'?'✔️ Correct':r==='invalide'?'❌ Manqué':'⏳ En attente';
-            const vdCls = r==='valide'?'badge-valide':r==='invalide'?'badge-invalide':'badge-attente';
+            const vc = r==='valide'?'badge-valide':r==='invalide'?'badge-invalide':'badge-attente';
             return `<tr style="cursor:pointer" data-hash="match/${m.id}">
                 <td><span class="statut statut-${m.statut}">${st}</span></td>
                 <td>${m.ligue}</td>
@@ -140,57 +124,63 @@ function afficherTableau(idConteneur, matches) {
                 <td>${m.heure}</td>
                 <td style="font-weight:700">${sc}</td>
                 <td>${m.scoreProbable}<br><span class="badge conf-${m.niveau}">${m.confiance}</span></td>
-                <td><span class="${vdCls}">${vd}</span></td>
+                <td><span class="${vc}">${vd}</span></td>
             </tr>`;
         }).join('')}
         </tbody>
     </table>`;
 
-    conteneur.querySelectorAll('tr[data-hash]').forEach(r => {
-        r.addEventListener('click', () => naviguerVers(r.getAttribute('data-hash')));
+    cont.querySelectorAll('tr[data-hash]').forEach(tr => {
+        tr.addEventListener('click', () => naviguer(tr.getAttribute('data-hash')));
     });
 }
 
-// ==============================================
-// DÉTAIL MATCH — COULEURS CLUBS
-// ==============================================
-function afficherDetailMatch(matchId, pushState = true) {
-    const m = [...donneesHier, ...donneesJour, ...donneesDemain].find(x => x.id === matchId);
+// --- DÉTAIL MATCH AVEC COULEURS CLUBS ---
+function afficherDetail(id, push = true) {
+    const m = [...donneesHier, ...donneesJour, ...donneesDemain].find(x => x.id === id);
     if (!m) return;
-    if (pushState && getHash() !== `match/${matchId}`) { naviguerVers(`match/${matchId}`); return; }
+    if (push && getHash() !== `match/${id}`) { naviguer(`match/${id}`); return; }
 
     const r = verifierProno(m);
     const [s1, s2] = m.scoreFinal ? m.scoreFinal.split('-').map(Number) : [null, null];
     const reel = m.scoreFinal ? (s1>s2?'1':s1<s2?'2':'N') : null;
     const pron = m.pronostic==='1'?`Victoire ${m.equipe1}`:m.pronostic==='2'?`Victoire ${m.equipe2}`:'Match nul';
-    const reelTxt = reel ? resultatEnTexte(reel, m.equipe1, m.equipe2) : '—';
+    const reelT = reel ? resultatTexte(reel, m.equipe1, m.equipe2) : '—';
     const vd = r==='valide'?'✔️ CORRECT':r==='invalide'?'❌ MANQUÉ':'⏳ En attente';
-    const vdCls = r==='valide'?'badge-valide':r==='invalide'?'badge-invalide':'badge-attente';
+    const vc = r==='valide'?'badge-valide':r==='invalide'?'badge-invalide':'badge-attente';
     const vrd = r==='valide'?'#f0fdf4':'#fef2f2';
     const vbd = r==='valide'?'#22c55e':'#ef4444';
-    const scTxt = m.statut==='termine'?`<strong>Score final : ${m.scoreFinal}</strong>`:
-                 m.statut==='direct'?`<strong style="color:#fbbf24">🔴 En direct : ${m.score.eq1} - ${m.score.eq2}</strong>`:'⏳ À venir';
+    const scT = m.statut==='termine'?`<strong>Score final : ${m.scoreFinal}</strong>`:
+              m.statut==='direct'?`<strong style="color:#fbbf24">🔴 En direct : ${m.score.eq1} - ${m.score.eq2}</strong>`:'⏳ À venir';
 
-    const forme = txt => (txt||'').split(', ').map(f =>
-        f.startsWith('V')?'<span style="color:#22c55e">✅</span>':
-        f.startsWith('N')?'<span style="color:#eab308">➖</span>':
-        f.startsWith('D')?'<span style="color:#ef4444">❌</span>':''
+    const iconeForme = f => f.startsWith('V')?'✅':f.startsWith('N')?'➖':'❌';
+    const couleurForme = f => f.startsWith('V')?'#22c55e':f.startsWith('N')?'#eab308':'#ef4444';
+
+    const formeHtml = txt => (txt||'').split(', ').map(f => 
+        `<span style="color:${couleurForme(f)}">${iconeForme(f)}</span>`
     ).join(' ');
 
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     let sec = document.getElementById('section-detail');
-    if (!sec) { sec = document.createElement('section'); sec.id='section-detail'; sec.className='page'; document.querySelector('main').appendChild(sec); }
+    if (!sec) {
+        sec = document.createElement('section');
+        sec.id = 'section-detail';
+        sec.className = 'page';
+        document.querySelector('main').appendChild(sec);
+    }
 
     sec.innerHTML = `
     <div style="max-width:900px;margin:0 auto;padding:2rem 1rem;">
         <button class="btn-retour" style="background:none;border:none;color:#10b981;font-size:1rem;cursor:pointer;padding:0.5rem 0;margin-bottom:1.5rem;">← Retour</button>
+        
         <div style="background:linear-gradient(135deg,#0f2744,#1e40af);color:#fff;padding:2rem;border-radius:16px 16px 0 0;">
             <p style="opacity:0.8;margin:0 0 0.5rem;">${m.ligue} — ${m.heure}</p>
             <h2 style="margin:0;font-size:2rem;font-weight:800;color:#93c5fd;">${m.equipe1}</h2>
             <p style="text-align:center;opacity:0.7;margin:0.4rem 0;">⚽ VS ⚽</p>
             <h2 style="margin:0;font-size:2rem;font-weight:800;color:#86efac;text-align:right;">${m.equipe2}</h2>
-            <p style="margin-top:1rem;text-align:center;">${scTxt}</p>
+            <p style="margin-top:1rem;text-align:center;">${scT}</p>
         </div>
+
         <div style="background:#fff;padding:2rem;border-radius:0 0 16px 16px;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-bottom:2rem;">
                 <div style="background:#eff6ff;padding:1.5rem;border-radius:12px;text-align:center;">
@@ -201,17 +191,19 @@ function afficherDetailMatch(matchId, pushState = true) {
                 <div style="background:${m.statut==='termine'?'#f0fdf4':'#f8fafc'};padding:1.5rem;border-radius:12px;text-align:center;">
                     <h3 style="color:#166534;font-size:0.85rem;letter-spacing:0.5px;margin:0 0 0.5rem;">RÉSULTAT FINAL</h3>
                     <p style="font-size:2rem;font-weight:800;margin:0;color:#166534;">${m.scoreFinal||'—'}</p>
-                    <p style="margin-top:0.3rem;color:#22c55e;">${reelTxt}</p>
+                    <p style="margin-top:0.3rem;color:#22c55e;">${reelT}</p>
                 </div>
             </div>
+
             ${m.statut==='termine'?`
             <div style="padding:1.5rem;border-radius:12px;background:${vrd};margin-bottom:2rem;text-align:center;border:2px solid ${vbd};">
                 <p style="font-size:1.4rem;font-weight:700;margin:0;">${r==='valide'?'✅ PRONOSTIC RÉUSSI':'❌ PRONOSTIC MANQUÉ'}</p>
-                <p style="margin-top:0.5rem;"><span class="${vdCls}">${vd}</span></p>
+                <p style="margin-top:0.5rem;"><span class="${vc}">${vd}</span></p>
             </div>`:`
             <div style="padding:1.5rem;border-radius:12px;background:#f8fafc;margin-bottom:2rem;text-align:center;">
                 <p style="font-size:1.2rem;font-weight:600;margin:0;color:#64748b;">⏳ En attente du résultat final</p>
             </div>`}
+
             <div style="margin-bottom:2rem;">
                 <h3 style="margin-bottom:1rem;">📈 Statistiques attendues</h3>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;">
@@ -220,99 +212,115 @@ function afficherDetailMatch(matchId, pushState = true) {
                     <div style="background:#f3e8ff;padding:1rem;border-radius:10px;text-align:center;"><p style="font-size:0.85rem;color:#6b21a8;margin:0 0 0.3rem;">🤝 Fautes</p><p style="font-weight:700;margin:0;">${m.fautesProbables}</p></div>
                 </div>
             </div>
+
             <div style="margin-bottom:2rem;">
                 <h3 style="margin-bottom:1rem;">🔥 Forme (5 derniers matchs)</h3>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;">
                     <div style="background:#eff6ff;padding:1.25rem;border-radius:10px;border-left:4px solid #2563eb;">
                         <h4 style="margin:0 0 0.75rem;color:#1e40af;">${m.equipe1}</h4>
-                        <p>${forme(m.forme1)}<br><small style="color:#64748b;">${m.forme1||''}</small></p>
+                        <p>${formeHtml(m.forme1)}<br><small style="color:#64748b;">${m.forme1||''}</small></p>
                     </div>
                     <div style="background:#f0fdf4;padding:1.25rem;border-radius:10px;border-left:4px solid #16a34a;">
                         <h4 style="margin:0 0 0.75rem;color:#166534;">${m.equipe2}</h4>
-                        <p>${forme(m.forme2)}<br><small style="color:#64748b;">${m.forme2||''}</small></p>
+                        <p>${formeHtml(m.forme2)}<br><small style="color:#64748b;">${m.forme2||''}</small></p>
                     </div>
                 </div>
             </div>
+
             <div style="margin-bottom:2rem;">
                 <h3 style="margin-bottom:0.5rem;">🎯 Confiance</h3>
                 <span class="badge conf-${m.niveau}" style="font-size:1rem;padding:0.5rem 1rem;">${m.confiance}</span>
             </div>
+
             <div><h3 style="margin-bottom:1rem;">📊 Analyse</h3><p style="line-height:1.7;">${m.analyse}</p></div>
         </div>
     </div>`;
     sec.classList.add('active');
 }
 
-// ==============================================
-// STATS & COUPONS
-// ==============================================
-function calculerStats(ms) {
-    const t = ms.filter(m => m.statut==='termine');
-    const v = t.filter(m => verifierProno(m)==='valide');
-    return {t, v, d:ms.filter(m=>m.statut==='direct'), tx:t.length?Math.round(v.length/t.length*100):null};
-}
+// --- STATISTIQUES & COUPONS ---
+function majStats() {
+    const termines = donneesJour.filter(m => m.statut === 'termine');
+    const valides = termines.filter(m => verifierProno(m) === 'valide');
+    const direct = donneesJour.filter(m => m.statut === 'direct');
+    const tx = termines.length ? Math.round(valides.length / termines.length * 100) : null;
 
-function mettreAJourResume() {
-    const s = calculerStats(donneesJour);
-    document.getElementById('nb-en-direct').innerHTML = `🔴 En direct : <strong>${s.d.length}</strong>`;
-    document.getElementById('nb-termines').innerHTML = `✅ Terminés : <strong>${s.t.length}</strong>`;
-    document.getElementById('taux-reussite').innerHTML = `🎯 Taux : <strong>${s.tx||'—'}%</strong>`;
-    document.getElementById('total-matchs').textContent = donneesJour.length;
-    document.getElementById('total-reussi').textContent = s.v.length;
-    document.getElementById('taux-global').textContent = s.tx ? `${s.tx}%` : '— %';
+    const elD = document.getElementById('nb-en-direct');
+    const elT = document.getElementById('nb-termines');
+    const elTx = document.getElementById('taux-reussite');
+    const elTot = document.getElementById('total-matchs');
+    const elVal = document.getElementById('total-reussi');
+    const elTxG = document.getElementById('taux-global');
+
+    if (elD) elD.innerHTML = `🔴 En direct : <strong>${direct.length}</strong>`;
+    if (elT) elT.innerHTML = `✅ Terminés : <strong>${termines.length}</strong>`;
+    if (elTx) elTx.innerHTML = `🎯 Taux : <strong>${tx || '—'}%</strong>`;
+    if (elTot) elTot.textContent = donneesJour.length;
+    if (elVal) elVal.textContent = valides.length;
+    if (elTxG) elTxG.textContent = tx ? `${tx}%` : '— %';
 }
 
 function genererCoupons() {
-    const A = donneesJour.filter(m => m.niveau==='elevee').slice(0,5);
-    const B = donneesJour.filter(m => m.niveau==='moyenne').slice(0,5);
-    const row = m => {
+    const A = donneesJour.filter(m => m.niveau === 'elevee').slice(0, 5);
+    const B = donneesJour.filter(m => m.niveau === 'moyenne').slice(0, 5);
+    
+    const ligne = m => {
         const r = verifierProno(m);
-        const i = r==='valide'?'✔️':r==='invalide'?'❌':'⏳';
+        const i = r === 'valide' ? '✔️' : r === 'invalide' ? '❌' : '⏳';
         return `<li style="cursor:pointer" data-hash="match/${m.id}"><span><strong>${m.equipe1} – ${m.equipe2}</strong><br>${m.scoreProbable}</span><span>${i}</span></li>`;
     };
-    document.getElementById('liste-coupon-a').innerHTML = A.map(row).join('');
-    document.getElementById('liste-coupon-b').innerHTML = B.map(row).join('');
-    document.querySelectorAll('#liste-coupon-a li,#liste-coupon-b li').forEach(l => {
-        l.addEventListener('click', () => naviguerVers(l.getAttribute('data-hash')));
+
+    const contA = document.getElementById('liste-coupon-a');
+    const contB = document.getElementById('liste-coupon-b');
+    if (contA) contA.innerHTML = A.map(ligne).join('');
+    if (contB) contB.innerHTML = B.map(ligne).join('');
+
+    document.querySelectorAll('#liste-coupon-a li, #liste-coupon-b li').forEach(li => {
+        li.addEventListener('click', () => naviguer(li.getAttribute('data-hash')));
     });
-    document.getElementById('score-a').innerHTML = `Réussi : <strong>${A.filter(m=>verifierProno(m)==='valide').length}/5</strong>`;
-    document.getElementById('score-b').innerHTML = `Réussi : <strong>${B.filter(m=>verifierProno(m)==='valide').length}/5</strong>`;
+
+    const sA = document.getElementById('score-a');
+    const sB = document.getElementById('score-b');
+    if (sA) sA.innerHTML = `Réussi : <strong>${A.filter(m => verifierProno(m) === 'valide').length}/5</strong>`;
+    if (sB) sB.innerHTML = `Réussi : <strong>${B.filter(m => verifierProno(m) === 'valide').length}/5</strong>`;
 }
 
-function simulerMiseAJour() {
-    donneesJour.forEach(m => {
-        if (m.statut==='direct') {
-            if (!m.score) m.score = {eq1:0,eq2:0};
-            if (Math.random()<0.08) Math.random()<0.5 ? m.score.eq1++ : m.score.eq2++;
-            if (Math.random()<0.015) { m.statut='termine'; m.scoreFinal=`${m.score.eq1} - ${m.score.eq2}`; }
-        }
-    });
-    afficherTableau('tableau-matchs', donneesJour);
-    afficherTableau('tableau-matchs-demain', donneesDemain);
-    genererCoupons();
-    mettreAJourResume();
+function simul() {
+    try {
+        donneesJour.forEach(m => {
+            if (m.statut === 'direct') {
+                if (!m.score) m.score = { eq1: 0, eq2: 0 };
+                if (Math.random() < 0.08) Math.random() < 0.5 ? m.score.eq1++ : m.score.eq2++;
+                if (Math.random() < 0.015) {
+                    m.statut = 'termine';
+                    m.scoreFinal = `${m.score.eq1} - ${m.score.eq2}`;
+                }
+            }
+        });
+        afficherTableau('tableau-matchs', donneesJour);
+        genererCoupons();
+        majStats();
+    } catch (e) { console.error('Erreur simul:', e); }
 }
 
-// ==============================================
-// LANCEMENT — TOUS LES TABLEAUX CHARGÉS
-// ==============================================
-window.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 KAJY STATS chargement...');
+// --- LANCEMENT PRINCIPAL ---
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 KAJY STATS - DÉBUT CHARGEMENT');
 
-    // ✅ CHARGEMENT EXPLICITE DE TOUS LES TABLEAUX
-    afficherTableau('tableau-matchs', donneesJour);
-    afficherTableau('tableau-matchs-hier', donneesHier);
-    afficherTableau('tableau-matchs-demain', donneesDemain);
-    afficherTableau('tableau-historique', donneesJour);
+    try {
+        // 1. Logo cliquable
+        const logo = document.querySelector('.logo-titre');
+        if (logo) logo.addEventListener('click', accueil);
 
-    genererCoupons();
-    mettreAJourResume();
+        // 2. Navigation boutons
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                const pid = btn.id.replace('nav-', '');
+                naviguer(pid === 'jour' ? '' : pid);
+            });
+        });
 
-    // ✅ LOGO CLIQUABLE
-    const logo = document.querySelector('.logo-titre');
-    if (logo) logo.addEventListener('click', revenirAccueil);
-
-    traiterHash();
-    setInterval(simulerMiseAJour, 30000);
-    console.log('✅ KAJY STATS PRÊT —', donneesJour.length, 'matchs chargés');
-});
+        // 3. Boutons retour
+        document.addEventListener('click', e => {
+            if (e.target.closest('.btn-retour')) retour
